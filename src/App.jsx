@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Volume2, BookOpen, Star, Search, X, Heart, LogOut, User, ArrowLeft, MessageSquare, Send, Trash2, Rss } from 'lucide-react';
+import { Volume2, BookOpen, Star, Search, X, Heart, LogOut, User, ArrowLeft, MessageSquare, Send, Trash2, Rss, ChevronDown, ChevronUp } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = 'https://lmfyihmgutdqkycfchiv.supabase.co';
@@ -14,8 +14,158 @@ const extractYouTubeId = (url) => {
   return match ? match[1] : null;
 };
 
+// コメントセクションコンポーネント
+const CommentSection = ({ postId, currentUser, onLoginRequired }) => {
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const fetchComments = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('comments')
+        .select('*')
+        .eq('post_id', postId)
+        .order('created_at', { ascending: true });
+      if (error) throw error;
+      setComments(data || []);
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+    }
+    setLoading(false);
+  };
+
+  const handleToggle = () => {
+    if (!isOpen && comments.length === 0) fetchComments();
+    setIsOpen(!isOpen);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!currentUser) { onLoginRequired(); return; }
+    if (!newComment.trim()) return;
+
+    setSubmitting(true);
+    try {
+      const { data, error } = await supabase
+        .from('comments')
+        .insert({
+          post_id: postId,
+          user_id: currentUser.id,
+          user_email: currentUser.email,
+          content: newComment.trim(),
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      setComments([...comments, data]);
+      setNewComment('');
+    } catch (error) {
+      console.error('Error submitting comment:', error);
+    }
+    setSubmitting(false);
+  };
+
+  const handleDelete = async (commentId) => {
+    if (!window.confirm('このコメントを削除しますか？')) return;
+    try {
+      const { error } = await supabase.from('comments').delete().eq('id', commentId);
+      if (error) throw error;
+      setComments(comments.filter(c => c.id !== commentId));
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+    }
+  };
+
+  return (
+    <div className="mt-3 border-t border-gray-100 pt-3">
+      {/* コメント開閉ボタン */}
+      <button
+        onClick={handleToggle}
+        className="flex items-center space-x-2 text-sm text-gray-500 hover:text-indigo-600 transition"
+      >
+        <MessageSquare className="w-4 h-4" />
+        <span>コメント {comments.length > 0 ? `(${comments.length})` : ''}</span>
+        {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+      </button>
+
+      {isOpen && (
+        <div className="mt-3 space-y-3">
+          {/* コメント一覧 */}
+          {loading ? (
+            <p className="text-xs text-gray-400 pl-2">読み込み中...</p>
+          ) : comments.length === 0 ? (
+            <p className="text-xs text-gray-400 pl-2">まだコメントがありません</p>
+          ) : (
+            <div className="space-y-2">
+              {comments.map(comment => {
+                const isOwner = currentUser?.id === comment.user_id;
+                const date = new Date(comment.created_at).toLocaleDateString('ja-JP', {
+                  month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+                return (
+                  <div key={comment.id} className="flex items-start space-x-2 pl-2">
+                    <div className="w-7 h-7 bg-indigo-50 rounded-full flex items-center justify-center flex-shrink-0">
+                      <User className="w-4 h-4 text-indigo-400" />
+                    </div>
+                    <div className="flex-1 bg-gray-50 rounded-lg px-3 py-2">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-medium text-gray-700">{comment.user_email || '匿名ユーザー'}</span>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs text-gray-400">{date}</span>
+                          {isOwner && (
+                            <button
+                              onClick={() => handleDelete(comment.id)}
+                              className="text-gray-300 hover:text-red-400 transition"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-800 whitespace-pre-wrap">{comment.content}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* コメント入力フォーム */}
+          <form onSubmit={handleSubmit} className="flex items-start space-x-2 pl-2">
+            <div className="w-7 h-7 bg-indigo-50 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+              <User className="w-4 h-4 text-indigo-400" />
+            </div>
+            <div className="flex-1 flex space-x-2">
+              <input
+                type="text"
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder={currentUser ? 'コメントを入力...' : 'ログインしてコメントする'}
+                className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                disabled={!currentUser}
+                onClick={!currentUser ? onLoginRequired : undefined}
+              />
+              <button
+                type="submit"
+                disabled={submitting || !currentUser || !newComment.trim()}
+                className="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-200 disabled:cursor-not-allowed transition"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // 投稿カードコンポーネント
-const PostCard = ({ post, currentUser, onDelete, wordName }) => {
+const PostCard = ({ post, currentUser, onDelete, onLoginRequired, wordName }) => {
   const videoId = extractYouTubeId(post.youtube_url);
   const isOwner = currentUser?.id === post.user_id;
   const date = new Date(post.created_at).toLocaleDateString('ja-JP', {
@@ -65,6 +215,13 @@ const PostCard = ({ post, currentUser, onDelete, wordName }) => {
           />
         </div>
       )}
+
+      {/* コメントセクション */}
+      <CommentSection
+        postId={post.id}
+        currentUser={currentUser}
+        onLoginRequired={onLoginRequired}
+      />
     </div>
   );
 };
@@ -140,15 +297,12 @@ function App() {
   const [favorites, setFavorites] = useState([]);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
-  // ページ遷移: 'list' | 'detail' | 'feed'
   const [currentView, setCurrentView] = useState('list');
 
-  // SNS
   const [wordPosts, setWordPosts] = useState([]);
   const [feedPosts, setFeedPosts] = useState([]);
   const [feedLoading, setFeedLoading] = useState(false);
 
-  // 認証用state
   const [showAuth, setShowAuth] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
@@ -162,21 +316,14 @@ function App() {
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchFavorites(session.user.id);
-      }
+      if (session?.user) fetchFavorites(session.user.id);
     });
 
     return () => { authListener?.subscription?.unsubscribe(); };
   }, []);
 
-  useEffect(() => {
-    filterWords();
-  }, [searchQuery, words, showFavoritesOnly, favorites]);
-
-  useEffect(() => {
-    if (currentView === 'feed') fetchFeedPosts();
-  }, [currentView]);
+  useEffect(() => { filterWords(); }, [searchQuery, words, showFavoritesOnly, favorites]);
+  useEffect(() => { if (currentView === 'feed') fetchFeedPosts(); }, [currentView]);
 
   const checkUser = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -212,7 +359,6 @@ function App() {
     }
   };
 
-  // 単語詳細の投稿を取得
   const fetchWordPosts = async (wordId) => {
     try {
       const { data, error } = await supabase
@@ -227,7 +373,6 @@ function App() {
     }
   };
 
-  // フィード（全投稿）を取得
   const fetchFeedPosts = async () => {
     setFeedLoading(true);
     try {
@@ -244,19 +389,12 @@ function App() {
     setFeedLoading(false);
   };
 
-  // 投稿を作成
   const createPost = async ({ content, youtube_url }) => {
     if (!user || !selectedWord) return;
     try {
       const { data, error } = await supabase
         .from('posts')
-        .insert({
-          user_id: user.id,
-          word_id: selectedWord.id,
-          content,
-          youtube_url,
-          user_email: user.email,
-        })
+        .insert({ user_id: user.id, word_id: selectedWord.id, content, youtube_url, user_email: user.email })
         .select()
         .single();
       if (error) throw error;
@@ -266,7 +404,6 @@ function App() {
     }
   };
 
-  // 投稿を削除
   const deletePost = async (postId) => {
     if (!window.confirm('この投稿を削除しますか？')) return;
     try {
@@ -326,8 +463,7 @@ function App() {
 
   const handleSignUp = async (e) => {
     e.preventDefault();
-    setAuthLoading(true);
-    setAuthError('');
+    setAuthLoading(true); setAuthError('');
     try {
       const { error } = await supabase.auth.signUp({ email, password });
       if (error) throw error;
@@ -339,8 +475,7 @@ function App() {
 
   const handleSignIn = async (e) => {
     e.preventDefault();
-    setAuthLoading(true);
-    setAuthError('');
+    setAuthLoading(true); setAuthError('');
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
@@ -363,10 +498,7 @@ function App() {
     window.scrollTo(0, 0);
   };
 
-  const backToList = () => {
-    setCurrentView('list');
-    window.scrollTo(0, 0);
-  };
+  const backToList = () => { setCurrentView('list'); window.scrollTo(0, 0); };
 
   if (loading) {
     return (
@@ -383,9 +515,7 @@ function App() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-8">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">
-                {isSignUp ? 'アカウント作成' : 'ログイン'}
-              </h2>
+              <h2 className="text-2xl font-bold text-gray-900">{isSignUp ? 'アカウント作成' : 'ログイン'}</h2>
               <button onClick={() => setShowAuth(false)} className="p-2 hover:bg-gray-100 rounded-full">
                 <X className="w-6 h-6 text-gray-600" />
               </button>
@@ -433,7 +563,6 @@ function App() {
             </div>
 
             <div className="flex items-center space-x-4">
-              {/* SNSフィードボタン */}
               <button
                 onClick={() => setCurrentView('feed')}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition ${
@@ -444,7 +573,6 @@ function App() {
                 <span>みんなの投稿</span>
               </button>
 
-              {/* 検索バー */}
               <div className="relative w-72">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
@@ -461,7 +589,6 @@ function App() {
                 )}
               </div>
 
-              {/* ユーザーメニュー */}
               {user ? (
                 <div className="flex items-center space-x-3">
                   <button
@@ -491,7 +618,7 @@ function App() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
 
-        {/* ===== フィードページ ===== */}
+        {/* フィードページ */}
         {currentView === 'feed' && (
           <div className="max-w-2xl mx-auto">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">みんなの投稿</h2>
@@ -511,6 +638,7 @@ function App() {
                     post={post}
                     currentUser={user}
                     onDelete={deletePost}
+                    onLoginRequired={() => setShowAuth(true)}
                     wordName={post.words?.word}
                   />
                 ))}
@@ -519,7 +647,7 @@ function App() {
           </div>
         )}
 
-        {/* ===== 単語一覧ページ ===== */}
+        {/* 単語一覧ページ */}
         {currentView === 'list' && (
           <>
             <div className="mb-6">
@@ -531,9 +659,7 @@ function App() {
 
             {filteredWords.length === 0 ? (
               <div className="text-center py-16">
-                <p className="text-gray-500 mb-4">
-                  {showFavoritesOnly ? 'お気に入りがありません' : '検索結果がありません'}
-                </p>
+                <p className="text-gray-500 mb-4">{showFavoritesOnly ? 'お気に入りがありません' : '検索結果がありません'}</p>
                 <button onClick={() => { clearSearch(); setShowFavoritesOnly(false); }} className="text-indigo-600 hover:text-indigo-700 underline">
                   すべて表示
                 </button>
@@ -558,9 +684,7 @@ function App() {
                     )}
                     <div className="p-6" onClick={() => openWordDetail(word)}>
                       <h3 className="text-2xl font-bold text-gray-900 mb-2">{word.word}</h3>
-                      {word.pronunciations?.us?.ipa && (
-                        <p className="text-gray-600 mb-3">{word.pronunciations.us.ipa}</p>
-                      )}
+                      {word.pronunciations?.us?.ipa && <p className="text-gray-600 mb-3">{word.pronunciations.us.ipa}</p>}
                       {word.meanings && word.meanings[0]?.definitions && word.meanings[0].definitions[0] && (
                         <p className="text-gray-700 line-clamp-2">{word.meanings[0].definitions[0].definition}</p>
                       )}
@@ -581,7 +705,7 @@ function App() {
           </>
         )}
 
-        {/* ===== 単語詳細ページ ===== */}
+        {/* 単語詳細ページ */}
         {currentView === 'detail' && selectedWord && (
           <div className="space-y-6">
             {selectedWord.youtube_shorts && selectedWord.youtube_shorts.length > 0 && (
@@ -612,18 +736,14 @@ function App() {
                       <div className="flex items-center space-x-3">
                         <span className="text-gray-600">🇺🇸 US:</span>
                         <span className="font-mono text-lg">{selectedWord.pronunciations.us.ipa}</span>
-                        <button className="p-2 hover:bg-gray-100 rounded-full">
-                          <Volume2 className="w-5 h-5 text-indigo-600" />
-                        </button>
+                        <button className="p-2 hover:bg-gray-100 rounded-full"><Volume2 className="w-5 h-5 text-indigo-600" /></button>
                       </div>
                     )}
                     {selectedWord.pronunciations.uk?.ipa && (
                       <div className="flex items-center space-x-3">
                         <span className="text-gray-600">🇬🇧 UK:</span>
                         <span className="font-mono text-lg">{selectedWord.pronunciations.uk.ipa}</span>
-                        <button className="p-2 hover:bg-gray-100 rounded-full">
-                          <Volume2 className="w-5 h-5 text-indigo-600" />
-                        </button>
+                        <button className="p-2 hover:bg-gray-100 rounded-full"><Volume2 className="w-5 h-5 text-indigo-600" /></button>
                       </div>
                     )}
                   </div>
@@ -719,7 +839,7 @@ function App() {
               )}
             </div>
 
-            {/* ===== SNS投稿セクション ===== */}
+            {/* SNS投稿セクション */}
             <div className="space-y-4">
               <h3 className="text-xl font-bold text-gray-900 flex items-center space-x-2">
                 <MessageSquare className="w-6 h-6 text-indigo-600" />
@@ -727,7 +847,6 @@ function App() {
                 <span className="text-sm font-normal text-gray-500">({wordPosts.length}件)</span>
               </h3>
 
-              {/* 投稿フォーム */}
               <PostForm
                 user={user}
                 wordId={selectedWord.id}
@@ -735,7 +854,6 @@ function App() {
                 onLoginRequired={() => setShowAuth(true)}
               />
 
-              {/* 投稿一覧 */}
               {wordPosts.length === 0 ? (
                 <div className="text-center py-8 text-gray-400">
                   <MessageSquare className="w-10 h-10 mx-auto mb-2 opacity-50" />
@@ -749,6 +867,7 @@ function App() {
                       post={post}
                       currentUser={user}
                       onDelete={deletePost}
+                      onLoginRequired={() => setShowAuth(true)}
                     />
                   ))}
                 </div>
