@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Volume2, BookOpen, Star } from 'lucide-react';
+import { Volume2, BookOpen, Star, Search, X } from 'lucide-react';
 
 const SUPABASE_URL = 'https://lmfyihmgutdqkycfchiv.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_vvksyX1iHLLDo_R0MFmXrw_7oLPkzOi';
@@ -8,10 +8,16 @@ function App() {
   const [words, setWords] = useState([]);
   const [selectedWord, setSelectedWord] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredWords, setFilteredWords] = useState([]);
 
   useEffect(() => {
     fetchWords();
   }, []);
+
+  useEffect(() => {
+    filterWords();
+  }, [searchQuery, words]);
 
   const fetchWords = async () => {
     setLoading(true);
@@ -29,6 +35,7 @@ function App() {
       if (response.ok) {
         const data = await response.json();
         setWords(data);
+        setFilteredWords(data);
         if (data.length > 0) {
           setSelectedWord(data[0]);
         }
@@ -37,6 +44,56 @@ function App() {
       console.error('Error fetching words:', error);
     }
     setLoading(false);
+  };
+
+  const filterWords = () => {
+    if (!searchQuery.trim()) {
+      setFilteredWords(words);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase();
+    const filtered = words.filter(word => {
+      // 英単語で検索
+      if (word.word.toLowerCase().includes(query)) {
+        return true;
+      }
+
+      // 日本語の意味で検索
+      if (word.meanings) {
+        for (const meaning of word.meanings) {
+          if (meaning.definitions) {
+            for (const def of meaning.definitions) {
+              if (def.definition?.toLowerCase().includes(query) ||
+                  def.explanation?.toLowerCase().includes(query)) {
+                return true;
+              }
+              // 例文で検索
+              if (def.examples) {
+                for (const example of def.examples) {
+                  if (example.toLowerCase().includes(query)) {
+                    return true;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      return false;
+    });
+
+    setFilteredWords(filtered);
+    
+    // 検索結果がある場合、最初の単語を選択
+    if (filtered.length > 0) {
+      setSelectedWord(filtered[0]);
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
   };
 
   if (loading) {
@@ -51,40 +108,84 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <header className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center space-x-3">
-            <BookOpen className="w-8 h-8 text-indigo-600" />
-            <h1 className="text-3xl font-bold text-gray-900">
-              Learn English Everyday HOWDEE
-            </h1>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <BookOpen className="w-8 h-8 text-indigo-600" />
+              <h1 className="text-3xl font-bold text-gray-900">
+                Learn English Everyday HOWDEE
+              </h1>
+            </div>
+            
+            {/* 検索バー */}
+            <div className="relative w-96">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="単語を検索..."
+                className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+              {searchQuery && (
+                <button
+                  onClick={clearSearch}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full"
+                >
+                  <X className="w-4 h-4 text-gray-400" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* 検索結果件数 */}
+        {searchQuery && (
+          <div className="mb-4 text-gray-700">
+            <span className="font-semibold">{filteredWords.length}件</span>の単語が見つかりました
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl shadow-lg p-4 sticky top-24">
-              <h2 className="text-xl font-bold mb-4 text-gray-900">単語リスト</h2>
-              <div className="space-y-2">
-                {words.map((word) => (
+              <h2 className="text-xl font-bold mb-4 text-gray-900">
+                単語リスト ({filteredWords.length})
+              </h2>
+              
+              {filteredWords.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <p className="mb-2">検索結果がありません</p>
                   <button
-                    key={word.id}
-                    onClick={() => setSelectedWord(word)}
-                    className={`w-full text-left p-3 rounded-lg transition ${
-                      selectedWord?.id === word.id
-                        ? 'bg-indigo-100 border-2 border-indigo-600'
-                        : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
-                    }`}
+                    onClick={clearSearch}
+                    className="text-indigo-600 hover:text-indigo-700 underline"
                   >
-                    <div className="font-bold text-lg">{word.word}</div>
-                    {word.pronunciations?.us?.ipa && (
-                      <div className="text-sm text-gray-600">
-                        {word.pronunciations.us.ipa}
-                      </div>
-                    )}
+                    検索をクリア
                   </button>
-                ))}
-              </div>
+                </div>
+              ) : (
+                <div className="space-y-2 max-h-[calc(100vh-200px)] overflow-y-auto">
+                  {filteredWords.map((word) => (
+                    <button
+                      key={word.id}
+                      onClick={() => setSelectedWord(word)}
+                      className={`w-full text-left p-3 rounded-lg transition ${
+                        selectedWord?.id === word.id
+                          ? 'bg-indigo-100 border-2 border-indigo-600'
+                          : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
+                      }`}
+                    >
+                      <div className="font-bold text-lg">{word.word}</div>
+                      {word.pronunciations?.us?.ipa && (
+                        <div className="text-sm text-gray-600">
+                          {word.pronunciations.us.ipa}
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
