@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Volume2, BookOpen, Star, Search, X, Heart, LogOut, User } from 'lucide-react';
+import { Volume2, BookOpen, Star, Search, X, Heart, LogOut, User, ArrowLeft } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = 'https://lmfyihmgutdqkycfchiv.supabase.co';
@@ -17,6 +17,9 @@ function App() {
   const [favorites, setFavorites] = useState([]);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   
+  // ページ遷移
+  const [currentView, setCurrentView] = useState('list'); // 'list' or 'detail'
+  
   // 認証用state
   const [showAuth, setShowAuth] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
@@ -29,7 +32,6 @@ function App() {
     checkUser();
     fetchWords();
     
-    // 認証状態の監視
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -71,9 +73,6 @@ function App() {
         const data = await response.json();
         setWords(data);
         setFilteredWords(data);
-        if (data.length > 0) {
-          setSelectedWord(data[0]);
-        }
       }
     } catch (error) {
       console.error('Error fetching words:', error);
@@ -107,7 +106,6 @@ function App() {
 
     try {
       if (isFavorited) {
-        // お気に入りから削除
         const { error } = await supabase
           .from('favorites')
           .delete()
@@ -115,16 +113,13 @@ function App() {
           .eq('word_id', wordId);
         
         if (error) throw error;
-        
         setFavorites(favorites.filter(id => id !== wordId));
       } else {
-        // お気に入りに追加
         const { error } = await supabase
           .from('favorites')
           .insert({ user_id: user.id, word_id: wordId });
         
         if (error) throw error;
-        
         setFavorites([...favorites, wordId]);
       }
     } catch (error) {
@@ -135,12 +130,10 @@ function App() {
   const filterWords = () => {
     let filtered = words;
 
-    // お気に入りフィルター
     if (showFavoritesOnly) {
       filtered = filtered.filter(word => favorites.includes(word.id));
     }
 
-    // 検索フィルター
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(word => {
@@ -168,10 +161,6 @@ function App() {
     }
 
     setFilteredWords(filtered);
-    
-    if (filtered.length > 0) {
-      setSelectedWord(filtered[0]);
-    }
   };
 
   const handleSignUp = async (e) => {
@@ -230,6 +219,17 @@ function App() {
 
   const clearSearch = () => {
     setSearchQuery('');
+  };
+
+  const openWordDetail = (word) => {
+    setSelectedWord(word);
+    setCurrentView('detail');
+    window.scrollTo(0, 0);
+  };
+
+  const backToList = () => {
+    setCurrentView('list');
+    window.scrollTo(0, 0);
   };
 
   if (loading) {
@@ -312,6 +312,14 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
+              {currentView === 'detail' && (
+                <button
+                  onClick={backToList}
+                  className="p-2 hover:bg-gray-100 rounded-full"
+                >
+                  <ArrowLeft className="w-6 h-6 text-gray-700" />
+                </button>
+              )}
               <BookOpen className="w-8 h-8 text-indigo-600" />
               <h1 className="text-3xl font-bold text-gray-900">
                 Learn English Everyday HOWDEE
@@ -376,250 +384,284 @@ function App() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {searchQuery && (
-          <div className="mb-4 text-gray-700">
-            <span className="font-semibold">{filteredWords.length}件</span>の単語が見つかりました
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-lg p-4 sticky top-24">
-              <h2 className="text-xl font-bold mb-4 text-gray-900">
-                単語リスト ({filteredWords.length})
+        {currentView === 'list' ? (
+          // 単語一覧ページ
+          <>
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                {showFavoritesOnly ? 'お気に入りの単語' : 'すべての単語'}
               </h2>
-              
-              {filteredWords.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <p className="mb-2">
-                    {showFavoritesOnly ? 'お気に入りがありません' : '検索結果がありません'}
-                  </p>
-                  <button
-                    onClick={() => {
-                      clearSearch();
-                      setShowFavoritesOnly(false);
-                    }}
-                    className="text-indigo-600 hover:text-indigo-700 underline"
-                  >
-                    すべて表示
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-2 max-h-[calc(100vh-200px)] overflow-y-auto">
-                  {filteredWords.map((word) => (
-                    <button
-                      key={word.id}
-                      onClick={() => setSelectedWord(word)}
-                      className={`w-full text-left p-3 rounded-lg transition ${
-                        selectedWord?.id === word.id
-                          ? 'bg-indigo-100 border-2 border-indigo-600'
-                          : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="font-bold text-lg">{word.word}</div>
-                          {word.pronunciations?.us?.ipa && (
-                            <div className="text-sm text-gray-600">
-                              {word.pronunciations.us.ipa}
-                            </div>
-                          )}
-                        </div>
-                        {favorites.includes(word.id) && (
-                          <Heart className="w-5 h-5 fill-red-500 text-red-500" />
-                        )}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
+              <p className="text-gray-600">
+                {filteredWords.length}件の単語
+              </p>
             </div>
-          </div>
 
-          <div className="lg:col-span-3">
-            {selectedWord && (
-              <div className="space-y-6">
-                {selectedWord.youtube_shorts && selectedWord.youtube_shorts.length > 0 && (
-                  <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                    <div className="aspect-video">
-                      <iframe
-                        width="100%"
-                        height="100%"
-                        src={`https://www.youtube.com/embed/${selectedWord.youtube_shorts[0]}`}
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      ></iframe>
+            {filteredWords.length === 0 ? (
+              <div className="text-center py-16">
+                <p className="text-gray-500 mb-4">
+                  {showFavoritesOnly ? 'お気に入りがありません' : '検索結果がありません'}
+                </p>
+                <button
+                  onClick={() => {
+                    clearSearch();
+                    setShowFavoritesOnly(false);
+                  }}
+                  className="text-indigo-600 hover:text-indigo-700 underline"
+                >
+                  すべて表示
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredWords.map((word) => (
+                  <div
+                    key={word.id}
+                    className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition cursor-pointer"
+                  >
+                    {/* YouTube サムネイル */}
+                    {word.youtube_shorts && word.youtube_shorts.length > 0 && (
+                      <div 
+                        className="relative h-48 bg-gray-200"
+                        onClick={() => openWordDetail(word)}
+                      >
+                        <img
+                          src={`https://img.youtube.com/vi/${word.youtube_shorts[0]}/mqdefault.jpg`}
+                          alt={word.word}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
+                          <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center">
+                            <div className="w-0 h-0 border-l-8 border-l-white border-t-6 border-t-transparent border-b-6 border-b-transparent ml-1"></div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="p-6" onClick={() => openWordDetail(word)}>
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="text-2xl font-bold text-gray-900">{word.word}</h3>
+                      </div>
+                      
+                      {word.pronunciations?.us?.ipa && (
+                        <p className="text-gray-600 mb-3">{word.pronunciations.us.ipa}</p>
+                      )}
+
+                      {word.meanings && word.meanings[0]?.definitions && word.meanings[0].definitions[0] && (
+                        <p className="text-gray-700 line-clamp-2">
+                          {word.meanings[0].definitions[0].definition}
+                        </p>
+                      )}
                     </div>
-                  </div>
-                )}
 
-                <div className="bg-white rounded-xl shadow-lg p-8">
-                  <div className="border-b pb-6 mb-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <h2 className="text-5xl font-bold text-gray-900">
-                        {selectedWord.word}
-                      </h2>
+                    <div className="px-6 pb-6">
                       <button
-                        onClick={() => toggleFavorite(selectedWord.id)}
-                        className="p-3 hover:bg-gray-100 rounded-full transition"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFavorite(word.id);
+                        }}
+                        className="w-full flex items-center justify-center space-x-2 py-2 border-2 border-gray-200 rounded-lg hover:bg-gray-50 transition"
                       >
                         <Heart
-                          className={`w-8 h-8 ${
-                            favorites.includes(selectedWord.id)
+                          className={`w-5 h-5 ${
+                            favorites.includes(word.id)
                               ? 'fill-red-500 text-red-500'
                               : 'text-gray-400'
                           }`}
                         />
+                        <span className="text-gray-700">
+                          {favorites.includes(word.id) ? 'お気に入り済み' : 'お気に入りに追加'}
+                        </span>
                       </button>
                     </div>
-                    
-                    {selectedWord.pronunciations && (
-                      <div className="space-y-2">
-                        {selectedWord.pronunciations.us?.ipa && (
-                          <div className="flex items-center space-x-3">
-                            <span className="text-gray-600">🇺🇸 US:</span>
-                            <span className="font-mono text-lg">{selectedWord.pronunciations.us.ipa}</span>
-                            <button className="p-2 hover:bg-gray-100 rounded-full">
-                              <Volume2 className="w-5 h-5 text-indigo-600" />
-                            </button>
-                          </div>
-                        )}
-                        {selectedWord.pronunciations.uk?.ipa && (
-                          <div className="flex items-center space-x-3">
-                            <span className="text-gray-600">🇬🇧 UK:</span>
-                            <span className="font-mono text-lg">{selectedWord.pronunciations.uk.ipa}</span>
-                            <button className="p-2 hover:bg-gray-100 rounded-full">
-                              <Volume2 className="w-5 h-5 text-indigo-600" />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </div>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          // 単語詳細ページ（既存のコード）
+          selectedWord && (
+            <div className="space-y-6">
+              {selectedWord.youtube_shorts && selectedWord.youtube_shorts.length > 0 && (
+                <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                  <div className="aspect-video">
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      src={`https://www.youtube.com/embed/${selectedWord.youtube_shorts[0]}`}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                </div>
+              )}
 
-                  {selectedWord.necessity_ratings && (
-                    <div className="mb-8 p-6 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl">
-                      <h3 className="font-bold text-xl mb-4 text-gray-900">学習の重要度</h3>
-                      <div className="grid grid-cols-2 gap-4">
-                        {[
-                          ['アメリカ英会話', selectedWord.necessity_ratings.american_conversation],
-                          ['イギリス英会話', selectedWord.necessity_ratings.british_conversation],
-                          ['TOEIC', selectedWord.necessity_ratings.toeic],
-                          ['英検', selectedWord.necessity_ratings.eiken]
-                        ].map(([label, value]) => (
-                          <div key={label}>
-                            <p className="text-sm font-medium text-gray-700 mb-2">{label}</p>
-                            <div className="flex space-x-1">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`w-6 h-6 ${
-                                    i < value
-                                      ? 'fill-yellow-400 text-yellow-400'
-                                      : 'text-gray-300'
-                                  }`}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {selectedWord.meanings && selectedWord.meanings.map((meaning, idx) => (
-                    <div key={idx} className="mb-8">
-                      <div className="flex items-center space-x-3 mb-4">
-                        <span className="px-4 py-2 bg-indigo-600 text-white rounded-full font-bold">
-                          {meaning.part_of_speech}
-                        </span>
-                      </div>
-                      
-                      {meaning.definitions && meaning.definitions.map((def, defIdx) => (
-                        <div key={defIdx} className="mb-6 pl-4 border-l-4 border-indigo-200">
-                          <h4 className="text-2xl font-bold text-gray-900 mb-3">
-                            {def.definition}
-                          </h4>
-                          {def.explanation && (
-                            <p className="text-gray-700 text-lg leading-relaxed mb-4">
-                              {def.explanation}
-                            </p>
-                          )}
-                          {def.examples && def.examples.length > 0 && (
-                            <div className="space-y-3 mt-4">
-                              <p className="font-semibold text-gray-800">例文：</p>
-                              {def.examples.map((example, exIdx) => (
-                                <div key={exIdx} className="flex items-start space-x-3 bg-gray-50 p-4 rounded-lg">
-                                  <div className="flex-shrink-0 w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-sm">
-                                    {exIdx + 1}
-                                  </div>
-                                  <p className="text-gray-800 italic flex-1">{example}</p>
-                                  <button className="flex-shrink-0 p-2 hover:bg-gray-200 rounded-full">
-                                    <Volume2 className="w-4 h-4 text-indigo-600" />
-                                  </button>
-                                </div>
-                              ))}
-                            </div>
-                          )}
+              <div className="bg-white rounded-xl shadow-lg p-8">
+                <div className="border-b pb-6 mb-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <h2 className="text-5xl font-bold text-gray-900">
+                      {selectedWord.word}
+                    </h2>
+                    <button
+                      onClick={() => toggleFavorite(selectedWord.id)}
+                      className="p-3 hover:bg-gray-100 rounded-full transition"
+                    >
+                      <Heart
+                        className={`w-8 h-8 ${
+                          favorites.includes(selectedWord.id)
+                            ? 'fill-red-500 text-red-500'
+                            : 'text-gray-400'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                  
+                  {selectedWord.pronunciations && (
+                    <div className="space-y-2">
+                      {selectedWord.pronunciations.us?.ipa && (
+                        <div className="flex items-center space-x-3">
+                          <span className="text-gray-600">🇺🇸 US:</span>
+                          <span className="font-mono text-lg">{selectedWord.pronunciations.us.ipa}</span>
+                          <button className="p-2 hover:bg-gray-100 rounded-full">
+                            <Volume2 className="w-5 h-5 text-indigo-600" />
+                          </button>
                         </div>
-                      ))}
-                    </div>
-                  ))}
-
-                  {selectedWord.idioms && selectedWord.idioms.length > 0 && (
-                    <div className="mb-8">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-4">慣用句</h3>
-                      <div className="space-y-4">
-                        {selectedWord.idioms.map((idiom, idx) => (
-                          <div key={idx} className="p-5 bg-amber-50 border-l-4 border-amber-400 rounded-lg">
-                            <p className="font-bold text-xl text-gray-900 mb-2">{idiom.phrase}</p>
-                            <p className="text-gray-700 mb-2">{idiom.meaning}</p>
-                            <p className="text-gray-600 italic">"{idiom.example}"</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {selectedWord.similar_words && selectedWord.similar_words.length > 0 && (
-                    <div className="mb-8">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-4">類似単語</h3>
-                      <div className="flex flex-wrap gap-3">
-                        {selectedWord.similar_words.map((word, idx) => (
-                          <span
-                            key={idx}
-                            className="px-4 py-2 bg-green-100 text-green-800 rounded-full font-medium hover:bg-green-200 cursor-pointer transition"
-                          >
-                            {word}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {selectedWord.nearby_words && selectedWord.nearby_words.length > 0 && (
-                    <div>
-                      <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                        アルファベット順で近い単語
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedWord.nearby_words.slice(0, 12).map((word, idx) => (
-                          <span
-                            key={idx}
-                            className="px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200 cursor-pointer transition"
-                          >
-                            {word}
-                          </span>
-                        ))}
-                      </div>
+                      )}
+                      {selectedWord.pronunciations.uk?.ipa && (
+                        <div className="flex items-center space-x-3">
+                          <span className="text-gray-600">🇬🇧 UK:</span>
+                          <span className="font-mono text-lg">{selectedWord.pronunciations.uk.ipa}</span>
+                          <button className="p-2 hover:bg-gray-100 rounded-full">
+                            <Volume2 className="w-5 h-5 text-indigo-600" />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
+
+                {selectedWord.necessity_ratings && (
+                  <div className="mb-8 p-6 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl">
+                    <h3 className="font-bold text-xl mb-4 text-gray-900">学習の重要度</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      {[
+                        ['アメリカ英会話', selectedWord.necessity_ratings.american_conversation],
+                        ['イギリス英会話', selectedWord.necessity_ratings.british_conversation],
+                        ['TOEIC', selectedWord.necessity_ratings.toeic],
+                        ['英検', selectedWord.necessity_ratings.eiken]
+                      ].map(([label, value]) => (
+                        <div key={label}>
+                          <p className="text-sm font-medium text-gray-700 mb-2">{label}</p>
+                          <div className="flex space-x-1">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`w-6 h-6 ${
+                                  i < value
+                                    ? 'fill-yellow-400 text-yellow-400'
+                                    : 'text-gray-300'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {selectedWord.meanings && selectedWord.meanings.map((meaning, idx) => (
+                  <div key={idx} className="mb-8">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <span className="px-4 py-2 bg-indigo-600 text-white rounded-full font-bold">
+                        {meaning.part_of_speech}
+                      </span>
+                    </div>
+                    
+                    {meaning.definitions && meaning.definitions.map((def, defIdx) => (
+                      <div key={defIdx} className="mb-6 pl-4 border-l-4 border-indigo-200">
+                        <h4 className="text-2xl font-bold text-gray-900 mb-3">
+                          {def.definition}
+                        </h4>
+                        {def.explanation && (
+                          <p className="text-gray-700 text-lg leading-relaxed mb-4">
+                            {def.explanation}
+                          </p>
+                        )}
+                        {def.examples && def.examples.length > 0 && (
+                          <div className="space-y-3 mt-4">
+                            <p className="font-semibold text-gray-800">例文：</p>
+                            {def.examples.map((example, exIdx) => (
+                              <div key={exIdx} className="flex items-start space-x-3 bg-gray-50 p-4 rounded-lg">
+                                <div className="flex-shrink-0 w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-sm">
+                                  {exIdx + 1}
+                                </div>
+                                <p className="text-gray-800 italic flex-1">{example}</p>
+                                <button className="flex-shrink-0 p-2 hover:bg-gray-200 rounded-full">
+                                  <Volume2 className="w-4 h-4 text-indigo-600" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+
+                {selectedWord.idioms && selectedWord.idioms.length > 0 && (
+                  <div className="mb-8">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4">慣用句</h3>
+                    <div className="space-y-4">
+                      {selectedWord.idioms.map((idiom, idx) => (
+                        <div key={idx} className="p-5 bg-amber-50 border-l-4 border-amber-400 rounded-lg">
+                          <p className="font-bold text-xl text-gray-900 mb-2">{idiom.phrase}</p>
+                          <p className="text-gray-700 mb-2">{idiom.meaning}</p>
+                          <p className="text-gray-600 italic">"{idiom.example}"</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {selectedWord.similar_words && selectedWord.similar_words.length > 0 && (
+                  <div className="mb-8">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4">類似単語</h3>
+                    <div className="flex flex-wrap gap-3">
+                      {selectedWord.similar_words.map((word, idx) => (
+                        <span
+                          key={idx}
+                          className="px-4 py-2 bg-green-100 text-green-800 rounded-full font-medium hover:bg-green-200 cursor-pointer transition"
+                        >
+                          {word}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {selectedWord.nearby_words && selectedWord.nearby_words.length > 0 && (
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                      アルファベット順で近い単語
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedWord.nearby_words.slice(0, 12).map((word, idx) => (
+                        <span
+                          key={idx}
+                          className="px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200 cursor-pointer transition"
+                        >
+                          {word}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </div>
+            </div>
+          )
+        )}
       </div>
     </div>
   );
