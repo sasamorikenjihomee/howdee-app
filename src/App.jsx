@@ -1,23 +1,58 @@
 import React, { useState, useEffect } from 'react';
-import { Volume2, BookOpen, Star, Search, X } from 'lucide-react';
+import { Volume2, BookOpen, Star, Search, X, Heart, LogOut, User } from 'lucide-react';
+import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = 'https://lmfyihmgutdqkycfchiv.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_vvksyX1iHLLDo_R0MFmXrw_7oLPkzOi';
 
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
 function App() {
+  const [user, setUser] = useState(null);
   const [words, setWords] = useState([]);
   const [selectedWord, setSelectedWord] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredWords, setFilteredWords] = useState([]);
+  const [favorites, setFavorites] = useState([]);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  
+  // 認証用state
+  const [showAuth, setShowAuth] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState('');
 
   useEffect(() => {
+    checkUser();
     fetchWords();
+    
+    // 認証状態の監視
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchFavorites(session.user.id);
+      }
+    });
+
+    return () => {
+      authListener?.subscription?.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
     filterWords();
-  }, [searchQuery, words]);
+  }, [searchQuery, words, showFavoritesOnly, favorites]);
+
+  const checkUser = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    setUser(session?.user ?? null);
+    if (session?.user) {
+      await fetchFavorites(session.user.id);
+    }
+  };
 
   const fetchWords = async () => {
     setLoading(true);
@@ -46,50 +81,151 @@ function App() {
     setLoading(false);
   };
 
-  const filterWords = () => {
-    if (!searchQuery.trim()) {
-      setFilteredWords(words);
+  const fetchFavorites = async (userId) => {
+    try {
+      const { data, error } = await supabase
+        .from('favorites')
+        .select('word_id')
+        .eq('user_id', userId);
+      
+      if (error) throw error;
+      
+      const favoriteWordIds = data.map(f => f.word_id);
+      setFavorites(favoriteWordIds);
+    } catch (error) {
+      console.error('Error fetching favorites:', error);
+    }
+  };
+
+  const toggleFavorite = async (wordId) => {
+    if (!user) {
+      setShowAuth(true);
       return;
     }
 
-    const query = searchQuery.toLowerCase();
-    const filtered = words.filter(word => {
-      // 英単語で検索
-      if (word.word.toLowerCase().includes(query)) {
-        return true;
-      }
+    const isFavorited = favorites.includes(wordId);
 
-      // 日本語の意味で検索
-      if (word.meanings) {
-        for (const meaning of word.meanings) {
-          if (meaning.definitions) {
-            for (const def of meaning.definitions) {
-              if (def.definition?.toLowerCase().includes(query) ||
-                  def.explanation?.toLowerCase().includes(query)) {
-                return true;
-              }
-              // 例文で検索
-              if (def.examples) {
-                for (const example of def.examples) {
-                  if (example.toLowerCase().includes(query)) {
-                    return true;
+    try {
+      if (isFavorited) {
+        // お気に入りから削除
+        const { error } = await supabase
+          .from('favorites')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('word_id', wordId);
+        
+        if (error) throw error;
+        
+        setFavorites(favorites.filter(id => id !== wordId));
+      } else {
+        // お気に入りに追加
+        const { error } = await supabase
+          .from('favorites')
+          .insert({ user_id: user.id, word_id: wordId });
+        
+        if (error) throw error;
+        
+        setFavorites([...favorites, wordId]);
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
+  };
+
+  const filterWords = () => {
+    let filtered = words;
+
+    // お気に入りフィルター
+    if (showFavoritesOnly) {
+      filtered = filtered.filter(word => favorites.includes(word.id));
+    }
+
+    // 検索フィルター
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(word => {
+        if (word.word.toLowerCase().includes(query)) return true;
+        
+        if (word.meanings) {
+          for (const meaning of word.meanings) {
+            if (meaning.definitions) {
+              for (const def of meaning.definitions) {
+                if (def.definition?.toLowerCase().includes(query) ||
+                    def.explanation?.toLowerCase().includes(query)) {
+                  return true;
+                }
+                if (def.examples) {
+                  for (const example of def.examples) {
+                    if (example.toLowerCase().includes(query)) return true;
                   }
                 }
               }
             }
           }
         }
-      }
-
-      return false;
-    });
+        return false;
+      });
+    }
 
     setFilteredWords(filtered);
     
-    // 検索結果がある場合、最初の単語を選択
     if (filtered.length > 0) {
       setSelectedWord(filtered[0]);
     }
+  };
+
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+    setAuthLoading(true);
+    setAuthError('');
+
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+      
+      alert('確認メールを送信しました。メールを確認してアカウントを有効化してください。');
+      setShowAuth(false);
+      setEmail('');
+      setPassword('');
+    } catch (error) {
+      setAuthError(error.message);
+    }
+    
+    setAuthLoading(false);
+  };
+
+  const handleSignIn = async (e) => {
+    e.preventDefault();
+    setAuthLoading(true);
+    setAuthError('');
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+      
+      setShowAuth(false);
+      setEmail('');
+      setPassword('');
+    } catch (error) {
+      setAuthError(error.message);
+    }
+    
+    setAuthLoading(false);
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setFavorites([]);
+    setShowFavoritesOnly(false);
   };
 
   const clearSearch = () => {
@@ -106,6 +242,72 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      {/* 認証モーダル */}
+      {showAuth && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">
+                {isSignUp ? 'アカウント作成' : 'ログイン'}
+              </h2>
+              <button onClick={() => setShowAuth(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                <X className="w-6 h-6 text-gray-600" />
+              </button>
+            </div>
+
+            <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  メールアドレス
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  パスワード
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  required
+                  minLength={6}
+                />
+              </div>
+
+              {authError && (
+                <div className="text-red-600 text-sm">{authError}</div>
+              )}
+
+              <button
+                type="submit"
+                disabled={authLoading}
+                className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 disabled:bg-gray-400 font-medium"
+              >
+                {authLoading ? '処理中...' : (isSignUp ? 'アカウント作成' : 'ログイン')}
+              </button>
+            </form>
+
+            <div className="mt-4 text-center">
+              <button
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-indigo-600 hover:text-indigo-700 text-sm"
+              >
+                {isSignUp ? 'すでにアカウントをお持ちの方はこちら' : 'アカウントを作成する'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <header className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -116,22 +318,56 @@ function App() {
               </h1>
             </div>
             
-            {/* 検索バー */}
-            <div className="relative w-96">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="単語を検索..."
-                className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              />
-              {searchQuery && (
+            <div className="flex items-center space-x-4">
+              {/* 検索バー */}
+              <div className="relative w-96">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="単語を検索..."
+                  className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={clearSearch}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full"
+                  >
+                    <X className="w-4 h-4 text-gray-400" />
+                  </button>
+                )}
+              </div>
+
+              {/* ユーザーメニュー */}
+              {user ? (
+                <div className="flex items-center space-x-3">
+                  <button
+                    onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition ${
+                      showFavoritesOnly
+                        ? 'bg-red-100 text-red-700 border-2 border-red-600'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    <Heart className={`w-5 h-5 ${showFavoritesOnly ? 'fill-current' : ''}`} />
+                    <span>お気に入り ({favorites.length})</span>
+                  </button>
+                  <button
+                    onClick={handleSignOut}
+                    className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                  >
+                    <LogOut className="w-5 h-5" />
+                    <span>ログアウト</span>
+                  </button>
+                </div>
+              ) : (
                 <button
-                  onClick={clearSearch}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full"
+                  onClick={() => setShowAuth(true)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
                 >
-                  <X className="w-4 h-4 text-gray-400" />
+                  <User className="w-5 h-5" />
+                  <span>ログイン</span>
                 </button>
               )}
             </div>
@@ -140,7 +376,6 @@ function App() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* 検索結果件数 */}
         {searchQuery && (
           <div className="mb-4 text-gray-700">
             <span className="font-semibold">{filteredWords.length}件</span>の単語が見つかりました
@@ -156,12 +391,17 @@ function App() {
               
               {filteredWords.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
-                  <p className="mb-2">検索結果がありません</p>
+                  <p className="mb-2">
+                    {showFavoritesOnly ? 'お気に入りがありません' : '検索結果がありません'}
+                  </p>
                   <button
-                    onClick={clearSearch}
+                    onClick={() => {
+                      clearSearch();
+                      setShowFavoritesOnly(false);
+                    }}
                     className="text-indigo-600 hover:text-indigo-700 underline"
                   >
-                    検索をクリア
+                    すべて表示
                   </button>
                 </div>
               ) : (
@@ -176,12 +416,19 @@ function App() {
                           : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
                       }`}
                     >
-                      <div className="font-bold text-lg">{word.word}</div>
-                      {word.pronunciations?.us?.ipa && (
-                        <div className="text-sm text-gray-600">
-                          {word.pronunciations.us.ipa}
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="font-bold text-lg">{word.word}</div>
+                          {word.pronunciations?.us?.ipa && (
+                            <div className="text-sm text-gray-600">
+                              {word.pronunciations.us.ipa}
+                            </div>
+                          )}
                         </div>
-                      )}
+                        {favorites.includes(word.id) && (
+                          <Heart className="w-5 h-5 fill-red-500 text-red-500" />
+                        )}
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -209,9 +456,23 @@ function App() {
 
                 <div className="bg-white rounded-xl shadow-lg p-8">
                   <div className="border-b pb-6 mb-6">
-                    <h2 className="text-5xl font-bold text-gray-900 mb-4">
-                      {selectedWord.word}
-                    </h2>
+                    <div className="flex items-start justify-between mb-4">
+                      <h2 className="text-5xl font-bold text-gray-900">
+                        {selectedWord.word}
+                      </h2>
+                      <button
+                        onClick={() => toggleFavorite(selectedWord.id)}
+                        className="p-3 hover:bg-gray-100 rounded-full transition"
+                      >
+                        <Heart
+                          className={`w-8 h-8 ${
+                            favorites.includes(selectedWord.id)
+                              ? 'fill-red-500 text-red-500'
+                              : 'text-gray-400'
+                          }`}
+                        />
+                      </button>
+                    </div>
                     
                     {selectedWord.pronunciations && (
                       <div className="space-y-2">
