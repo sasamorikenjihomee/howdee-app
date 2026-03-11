@@ -48,23 +48,23 @@ const ProfileEditModal = ({ user, profile, onClose, onSave }) => {
             <label className="block text-sm font-medium text-gray-700 mb-2">ユーザー名（@username）</label>
             <input type="text" value={username} onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))}
               placeholder="例: howdee_user"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 text-base" />
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 text-base" />
             <p className="text-xs text-gray-400 mt-1">英数字とアンダースコアのみ使用可能</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">表示名</label>
             <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)}
               placeholder="例: HOWDEEユーザー"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 text-base" />
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 text-base" />
           </div>
           {error && <p className="text-red-600 text-sm">{error}</p>}
           <div className="flex space-x-3 pt-2">
             <button type="button" onClick={onClose}
-              className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-base">
+              className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 text-base font-medium transition">
               キャンセル
             </button>
             <button type="submit" disabled={saving}
-              className="flex-1 px-4 py-3 bg-gray-900 text-white rounded-lg hover:bg-black disabled:bg-gray-400 text-base">
+              className="flex-1 px-4 py-3 bg-gray-900 text-white rounded-full hover:bg-black disabled:bg-gray-400 text-base">
               {saving ? '保存中...' : '保存する'}
             </button>
           </div>
@@ -96,10 +96,10 @@ const ProfilePage = ({ user, profile, onEditProfile, currentUser, onLoginRequire
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
               <User className="w-8 h-8 md:w-10 md:h-10 text-gray-900" />
             </div>
             <div>
@@ -235,10 +235,10 @@ const CommentSection = ({ postId, currentUser, onLoginRequired }) => {
           <form onSubmit={handleSubmit} className="flex items-center space-x-2 pl-2">
             <input type="text" value={newComment} onChange={(e) => setNewComment(e.target.value)}
               placeholder={currentUser ? 'コメントを入力...' : 'ログインしてコメント'}
-              className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+              className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-transparent"
               disabled={!currentUser} onClick={!currentUser ? onLoginRequired : undefined} />
             <button type="submit" disabled={submitting || !currentUser || !newComment.trim()}
-              className="p-2 bg-gray-900 text-white rounded-lg hover:bg-black disabled:bg-gray-200 disabled:cursor-not-allowed transition flex-shrink-0">
+              className="p-2 bg-gray-900 text-white rounded-full hover:bg-black disabled:bg-gray-200 disabled:cursor-not-allowed transition flex-shrink-0">
               <Send className="w-4 h-4" />
             </button>
           </form>
@@ -282,8 +282,8 @@ const LikeButton = ({ postId, currentUser, onLoginRequired }) => {
 
   return (
     <button onClick={handleToggle} disabled={loading}
-      className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg text-sm transition ${
-        liked ? 'bg-gray-50 text-gray-900 hover:bg-gray-100' : 'text-gray-400 hover:bg-gray-50 hover:text-blue-500'
+      className={`flex items-center space-x-1.5 px-3 py-2 rounded-full text-sm transition ${
+        liked ? 'bg-blue-50 text-blue-500' : 'text-gray-400 hover:bg-gray-100 hover:text-blue-400'
       }`}>
       <ThumbsUp className={`w-4 h-4 ${liked ? 'fill-blue-500 text-blue-500' : ''}`} />
       <span>{likeCount > 0 ? `${likeCount} ` : ''}いいね</span>
@@ -303,7 +303,7 @@ const PostCard = ({ post, currentUser, onDelete, onLoginRequired, wordName }) =>
     <div className="bg-white border-b border-gray-200 px-4 py-4 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3 min-w-0">
-          <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
             <User className="w-5 h-5 text-gray-900" />
           </div>
           <div className="min-w-0">
@@ -312,7 +312,7 @@ const PostCard = ({ post, currentUser, onDelete, onLoginRequired, wordName }) =>
           </div>
         </div>
         <div className="flex items-center space-x-2 flex-shrink-0 ml-2">
-          {wordName && <span className="hidden sm:inline px-2 py-1 bg-gray-50 text-gray-900 text-xs rounded-full font-medium">{wordName}</span>}
+          {wordName && <span className="hidden sm:inline px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-full font-medium">{wordName}</span>}
           {isOwner && (
             <button onClick={() => onDelete(post.id)} className="p-2 hover:bg-red-50 rounded-full text-gray-400 hover:text-red-500 transition">
               <Trash2 className="w-4 h-4" />
@@ -320,7 +320,7 @@ const PostCard = ({ post, currentUser, onDelete, onLoginRequired, wordName }) =>
           )}
         </div>
       </div>
-      {wordName && <span className="sm:hidden inline-block px-2 py-1 bg-gray-50 text-gray-900 text-xs rounded-full font-medium">{wordName}</span>}
+      {wordName && <span className="sm:hidden inline-block px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-full font-medium">{wordName}</span>}
       <p className="text-gray-800 whitespace-pre-wrap text-sm md:text-base">{post.content}</p>
       {videoId && (
         <div className="aspect-video rounded-lg overflow-hidden">
@@ -353,27 +353,27 @@ const PostForm = ({ user, onSubmit, onLoginRequired }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow p-4 md:p-5">
+    <div className="bg-white border border-gray-200 rounded-2xl p-4 md:p-5">
       <h4 className="font-bold text-gray-900 mb-3 flex items-center space-x-2 text-sm md:text-base">
         <MessageSquare className="w-5 h-5 text-gray-900" />
         <span>この単語について投稿する</span>
       </h4>
       {!user && (
         <p className="text-sm text-gray-500 mb-3">
-          投稿するには<button onClick={onLoginRequired} className="text-gray-900 underline mx-1">ログイン</button>が必要です
+          投稿するには<button onClick={onLoginRequired} className="text-blue-500 hover:underline mx-1 font-medium">ログイン</button>が必要です
         </p>
       )}
       <form onSubmit={handleSubmit} className="space-y-3">
         <textarea value={content} onChange={(e) => setContent(e.target.value)}
           placeholder="この単語の使い方、覚え方、エピソードなど..."
-          className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-none text-sm md:text-base"
+          className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-transparent resize-none text-sm md:text-base"
           rows={3} disabled={!user} />
         <input type="url" value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)}
           placeholder="YouTube URL（任意）"
-          className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm md:text-base"
+          className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-transparent text-sm md:text-base"
           disabled={!user} />
         <button type="submit" disabled={submitting || !user || !content.trim()}
-          className="flex items-center space-x-2 px-5 py-3 bg-gray-900 text-white rounded-lg hover:bg-black disabled:bg-gray-300 disabled:cursor-not-allowed transition text-sm md:text-base font-medium w-full justify-center sm:w-auto">
+          className="flex items-center space-x-2 px-5 py-2.5 bg-gray-900 text-white rounded-full hover:bg-black disabled:bg-gray-300 disabled:cursor-not-allowed transition text-sm font-medium w-full justify-center sm:w-auto">
           <Send className="w-4 h-4" />
           <span>{submitting ? '投稿中...' : '投稿する'}</span>
         </button>
@@ -568,7 +568,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20 xl:pb-0">
+    <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
 
       {/* 認証モーダル */}
       {showAuth && (
@@ -582,16 +582,16 @@ function App() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">メールアドレス</label>
                 <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 text-base" required />
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 text-base" required />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">パスワード</label>
                 <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 text-base" required minLength={6} />
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 text-base" required minLength={6} />
               </div>
               {authError && <div className="text-red-600 text-sm">{authError}</div>}
               <button type="submit" disabled={authLoading}
-                className="w-full bg-gray-900 text-white py-3 rounded-lg hover:bg-black disabled:bg-gray-400 font-medium text-base">
+                className="w-full bg-gray-900 text-white py-3 rounded-full hover:bg-black disabled:bg-gray-400 font-medium text-base">
                 {authLoading ? '処理中...' : (isSignUp ? 'アカウント作成' : 'ログイン')}
               </button>
             </form>
@@ -621,7 +621,7 @@ function App() {
             </div>
             {user ? (
               <div className="space-y-2">
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg mb-4">
+                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-2xl mb-4">
                   <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
                     <User className="w-5 h-5 text-gray-900" />
                   </div>
@@ -654,7 +654,7 @@ function App() {
               </div>
             ) : (
               <button onClick={() => { setShowAuth(true); setShowMobileMenu(false); }}
-                className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gray-900 text-white rounded-lg hover:bg-black">
+                className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gray-900 text-white rounded-full hover:bg-black font-medium transition">
                 <User className="w-5 h-5" />
                 <span>ログイン / アカウント作成</span>
               </button>
@@ -663,8 +663,8 @@ function App() {
         </div>
       )}
 
-      {/* ===== ヘッダー (モバイル・タブレット) ===== */}
-      <header className="xl:hidden bg-white border-b border-gray-200 sticky top-0 z-30">
+      {/* ===== ヘッダー (モバイル・md未満のみ) ===== */}
+      <header className="md:hidden bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             {/* 左側 */}
@@ -687,7 +687,7 @@ function App() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="単語を検索..."
-                  className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent" />
+                  className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-transparent" />
                 {searchQuery && (
                   <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full">
                     <X className="w-4 h-4 text-gray-400" />
@@ -699,28 +699,28 @@ function App() {
             {/* 右側：デスクトップナビ */}
             <div className="hidden md:flex items-center space-x-3">
               <button onClick={() => navigateTo('feed')}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition ${currentView === 'feed' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition ${currentView === 'feed' ? 'font-bold text-gray-900' : 'text-gray-600 hover:bg-gray-100'}`}>
                 <Rss className="w-5 h-5" />
                 <span>みんなの投稿</span>
               </button>
               {user ? (
                 <>
                   <button onClick={() => { setShowFavoritesOnly(!showFavoritesOnly); navigateTo('list'); }}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition ${showFavoritesOnly ? 'bg-red-100 text-red-700 border-2 border-red-400' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition ${showFavoritesOnly ? 'font-bold text-red-500' : 'text-gray-600 hover:bg-gray-100'}`}>
                     <Heart className={`w-5 h-5 ${showFavoritesOnly ? 'fill-current' : ''}`} />
                     <span>お気に入り ({favorites.length})</span>
                   </button>
                   <button onClick={() => navigateTo('profile')}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition ${currentView === 'profile' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition ${currentView === 'profile' ? 'font-bold text-gray-900' : 'text-gray-600 hover:bg-gray-100'}`}>
                     <User className="w-5 h-5" />
                     <span>{profile?.display_name || profile?.username || 'マイページ'}</span>
                   </button>
-                  <button onClick={handleSignOut} className="p-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                  <button onClick={handleSignOut} className="p-2 text-gray-500 rounded-full hover:bg-gray-100 transition">
                     <LogOut className="w-5 h-5" />
                   </button>
                 </>
               ) : (
-                <button onClick={() => setShowAuth(true)} className="flex items-center space-x-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-black">
+                <button onClick={() => setShowAuth(true)} className="flex items-center space-x-2 px-5 py-2 bg-gray-900 text-white rounded-full text-sm font-medium hover:bg-black transition">
                   <User className="w-5 h-5" />
                   <span>ログイン</span>
                 </button>
@@ -745,7 +745,7 @@ function App() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input id="mobile-search" type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="単語を検索..."
-                className="w-full pl-9 pr-9 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm" />
+                className="w-full pl-9 pr-9 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-transparent text-sm" />
               {searchQuery && (
                 <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 transform -translate-y-1/2">
                   <X className="w-4 h-4 text-gray-400" />
@@ -756,70 +756,82 @@ function App() {
         </div>
       </header>
 
-      {/* ===== XL: 3カラムレイアウト ===== */}
-      <div className="xl:max-w-[1265px] xl:mx-auto xl:flex">
+      {/* ===== レイアウト ===== */}
+      <div className="max-w-[1280px] mx-auto flex items-start">
 
-        {/* ===== 左サイドバー (xl以上のみ表示) ===== */}
-        <div className="hidden xl:flex flex-col w-[275px] shrink-0 sticky top-0 h-screen px-3 py-2">
+        {/* ===== 左サイドバー (md以上で表示) ===== */}
+        <div className="hidden md:flex flex-col items-center xl:items-start shrink-0 sticky top-0 h-screen
+          w-[68px] xl:w-[260px]
+          px-2 xl:px-4 py-2 border-r border-gray-200 bg-white">
+
           {/* ロゴ */}
-          <button onClick={() => navigateTo('list')} className="p-3 hover:bg-gray-100 rounded-full w-fit mb-2 transition">
-            <BookOpen className="w-7 h-7 text-gray-900" />
+          <button onClick={() => navigateTo('list')} className="p-3 hover:bg-gray-100 rounded-full transition mb-1">
+            <BookOpen className="w-6 h-6 text-gray-900" />
           </button>
+
           {/* ナビ */}
-          <nav className="space-y-1">
-            <button onClick={() => navigateTo('list')}
-              className={`flex items-center space-x-4 px-4 py-3 rounded-full w-full text-left transition text-xl ${currentView === 'list' ? 'font-bold text-gray-900' : 'text-gray-700 hover:bg-gray-100'}`}>
-              <BookOpen className="w-6 h-6 shrink-0" />
-              <span>単語</span>
-            </button>
-            <button onClick={() => navigateTo('feed')}
-              className={`flex items-center space-x-4 px-4 py-3 rounded-full w-full text-left transition text-xl ${currentView === 'feed' ? 'font-bold text-gray-900' : 'text-gray-700 hover:bg-gray-100'}`}>
-              <Rss className="w-6 h-6 shrink-0" />
-              <span>みんなの投稿</span>
-            </button>
-            <button onClick={() => { if (user) { setShowFavoritesOnly(!showFavoritesOnly); navigateTo('list'); } else setShowAuth(true); }}
-              className={`flex items-center space-x-4 px-4 py-3 rounded-full w-full text-left transition text-xl ${showFavoritesOnly ? 'font-bold text-red-500' : 'text-gray-700 hover:bg-gray-100'}`}>
-              <Heart className={`w-6 h-6 shrink-0 ${showFavoritesOnly ? 'fill-current' : ''}`} />
-              <span>お気に入り</span>
-            </button>
-            <button onClick={() => { if (user) navigateTo('profile'); else setShowAuth(true); }}
-              className={`flex items-center space-x-4 px-4 py-3 rounded-full w-full text-left transition text-xl ${currentView === 'profile' ? 'font-bold text-gray-900' : 'text-gray-700 hover:bg-gray-100'}`}>
-              <User className="w-6 h-6 shrink-0" />
-              <span>マイページ</span>
-            </button>
-          </nav>
-          {/* ユーザー情報 or ログインボタン */}
-          <div className="mt-4">
-            {user ? (
-              <div className="space-y-2">
-                <div className="flex items-center space-x-3 px-3 py-3 rounded-full hover:bg-gray-100 cursor-pointer transition" onClick={() => navigateTo('profile')}>
-                  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center shrink-0">
-                    <User className="w-5 h-5 text-gray-600" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-bold text-sm text-gray-900 truncate">{profile?.display_name || profile?.username || 'ユーザー'}</p>
-                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                  </div>
-                  <button onClick={(e) => { e.stopPropagation(); handleSignOut(); }} className="p-1 hover:bg-gray-200 rounded-full ml-1" title="ログアウト">
-                    <LogOut className="w-4 h-4 text-gray-400" />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button onClick={() => setShowAuth(true)}
-                className="w-full py-3 bg-gray-900 text-white rounded-full font-bold text-base hover:bg-black transition">
-                ログイン
+          <nav className="flex flex-col items-center xl:items-start w-full space-y-1 mt-1">
+            {[
+              { view: 'list', icon: <BookOpen className="w-6 h-6 shrink-0" />, label: '単語',
+                action: () => navigateTo('list'), active: currentView === 'list' && !showFavoritesOnly },
+              { view: 'feed', icon: <Rss className="w-6 h-6 shrink-0" />, label: 'みんなの投稿',
+                action: () => navigateTo('feed'), active: currentView === 'feed' },
+              { view: 'fav', icon: <Heart className={`w-6 h-6 shrink-0 ${showFavoritesOnly ? 'fill-current text-red-500' : ''}`} />, label: 'お気に入り',
+                action: () => { if (user) { setShowFavoritesOnly(!showFavoritesOnly); navigateTo('list'); } else setShowAuth(true); },
+                active: showFavoritesOnly },
+              { view: 'profile', icon: <User className="w-6 h-6 shrink-0" />, label: user ? (profile?.display_name || profile?.username || 'マイページ') : 'ログイン',
+                action: () => { if (user) navigateTo('profile'); else setShowAuth(true); },
+                active: currentView === 'profile' },
+            ].map(({ view, icon, label, action, active }) => (
+              <button key={view} onClick={action}
+                className={`flex items-center space-x-4 p-3 rounded-full w-full transition
+                  ${active ? 'font-bold text-gray-900' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}>
+                {icon}
+                <span className="hidden xl:inline text-xl">{label}</span>
+              </button>
+            ))}
+            {user && (
+              <button onClick={handleSignOut}
+                className="flex items-center space-x-4 p-3 rounded-full w-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition">
+                <LogOut className="w-6 h-6 shrink-0" />
+                <span className="hidden xl:inline text-xl">ログアウト</span>
               </button>
             )}
-          </div>
+          </nav>
+
+          {/* ログインボタン (未ログイン時) */}
+          {!user && (
+            <div className="mt-4 w-full px-1">
+              <button onClick={() => setShowAuth(true)}
+                className="hidden xl:block w-full py-3 bg-gray-900 text-white rounded-full font-bold text-base hover:bg-black transition">
+                ログイン
+              </button>
+            </div>
+          )}
+
+          {/* ユーザーアバター (ログイン時・下部) */}
+          {user && (
+            <div className="mt-auto mb-4 w-full">
+              <div onClick={() => navigateTo('profile')}
+                className="flex items-center space-x-3 p-3 rounded-full hover:bg-gray-100 cursor-pointer transition">
+                <div className="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center shrink-0">
+                  <User className="w-5 h-5 text-gray-600" />
+                </div>
+                <div className="hidden xl:block min-w-0">
+                  <p className="text-sm font-bold text-gray-900 truncate">{profile?.display_name || profile?.username || 'ユーザー'}</p>
+                  <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* ===== メインコンテンツ ===== */}
-        <div className="flex-1 min-w-0 xl:max-w-[600px] xl:border-x xl:border-gray-200 xl:bg-white">
-          {/* xlでのページタイトルヘッダー */}
-          <div className="hidden xl:flex items-center px-4 py-3 border-b border-gray-200 sticky top-0 bg-white/90 backdrop-blur-sm z-10">
+        {/* ===== メインカラム ===== */}
+        <div className="flex-1 min-w-0 max-w-[600px] border-r border-gray-200 bg-white min-h-screen">
+          {/* ページタイトル（sticky） */}
+          <div className="flex items-center px-4 py-3 border-b border-gray-200 sticky top-0 bg-white/90 backdrop-blur-sm z-10">
             {currentView === 'detail' && (
-              <button onClick={() => { setCurrentView('list'); window.scrollTo(0, 0); }} className="p-2 hover:bg-gray-100 rounded-full mr-3">
+              <button onClick={() => { setCurrentView('list'); window.scrollTo(0, 0); }} className="p-2 hover:bg-gray-100 rounded-full mr-3 transition">
                 <ArrowLeft className="w-5 h-5 text-gray-900" />
               </button>
             )}
@@ -827,10 +839,10 @@ function App() {
               {currentView === 'list' ? (showFavoritesOnly ? 'お気に入り' : '単語') :
                currentView === 'feed' ? 'みんなの投稿' :
                currentView === 'profile' ? 'プロフィール' :
-               currentView === 'detail' ? (selectedWord?.word || '') : ''}
+               currentView === 'detail' && selectedWord ? selectedWord.word : ''}
             </h1>
           </div>
-        <div className="px-0 xl:px-0 py-0">
+        <div>
 
         {/* プロフィールページ */}
         {currentView === 'profile' && user && (
@@ -841,9 +853,7 @@ function App() {
         {/* フィードページ */}
         {currentView === 'feed' && (
           <div>
-            <div className="px-4 py-3 border-b border-gray-200">
-              <h2 className="text-lg font-bold text-gray-900">みんなの投稿</h2>
-            </div>
+
             {feedLoading ? (
               <p className="text-center text-gray-500 py-12">読み込み中...</p>
             ) : feedPosts.length === 0 ? (
@@ -865,12 +875,12 @@ function App() {
 
         {/* 単語一覧ページ */}
         {currentView === 'list' && (
-          <div className="px-4 py-4">
-            <div className="mb-4">
-              <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-1">
+          <div>
+            <div className="px-4 pt-2 pb-3 border-b border-gray-100">
+              <h2 className="text-base font-bold text-gray-900">
                 {showFavoritesOnly ? 'お気に入りの単語' : 'すべての単語'}
               </h2>
-              <p className="text-gray-500 text-sm">{filteredWords.length}件</p>
+              <p className="text-gray-400 text-xs">{filteredWords.length}件</p>
             </div>
             {filteredWords.length === 0 ? (
               <div className="text-center py-16">
@@ -880,11 +890,11 @@ function App() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              <div>
                 {filteredWords.map((word) => (
-                  <div key={word.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition cursor-pointer active:scale-95">
+                  <div key={word.id} className="bg-white border-b border-gray-200 overflow-hidden hover:bg-gray-50/50 transition cursor-pointer">
                     {word.youtube_shorts && word.youtube_shorts.length > 0 && (
-                      <div className="relative h-44 bg-gray-200" onClick={() => openWordDetail(word)}>
+                      <div className="relative h-36 bg-gray-200" onClick={() => openWordDetail(word)}>
                         <img src={`https://img.youtube.com/vi/${word.youtube_shorts[0]}/mqdefault.jpg`} alt={word.word} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
                           <div className="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center">
@@ -893,16 +903,16 @@ function App() {
                         </div>
                       </div>
                     )}
-                    <div className="p-4" onClick={() => openWordDetail(word)}>
+                    <div className="px-4 pt-3 pb-1" onClick={() => openWordDetail(word)}>
                       <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-1">{word.word}</h3>
                       {word.pronunciations?.us?.ipa && <p className="text-gray-500 text-sm mb-2">{word.pronunciations.us.ipa}</p>}
                       {word.meanings && word.meanings[0]?.definitions && word.meanings[0].definitions[0] && (
                         <p className="text-gray-700 text-sm line-clamp-2">{word.meanings[0].definitions[0].definition}</p>
                       )}
                     </div>
-                    <div className="px-4 pb-4">
+                    <div className="px-4 pb-3">
                       <button onClick={(e) => { e.stopPropagation(); toggleFavorite(word.id); }}
-                        className="w-full flex items-center justify-center space-x-2 py-2.5 border-2 border-gray-200 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition text-sm">
+                        className="w-full flex items-center justify-center space-x-2 py-2.5 border border-gray-200 rounded-full hover:bg-gray-50 active:bg-gray-100 transition text-sm">
                         <Heart className={`w-4 h-4 ${favorites.includes(word.id) ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
                         <span className="text-gray-700">{favorites.includes(word.id) ? 'お気に入り済み' : 'お気に入りに追加'}</span>
                       </button>
@@ -916,16 +926,16 @@ function App() {
 
         {/* 単語詳細ページ */}
         {currentView === 'detail' && selectedWord && (
-          <div className="space-y-4 px-4 py-4">
+          <div className="space-y-0">
             {selectedWord.youtube_shorts && selectedWord.youtube_shorts.length > 0 && (
-              <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+              <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
                 <div className="aspect-video">
                   <iframe width="100%" height="100%" src={`https://www.youtube.com/embed/${selectedWord.youtube_shorts[0]}`}
                     frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
                 </div>
               </div>
             )}
-            <div className="bg-white rounded-xl shadow-lg p-5 md:p-8">
+            <div className="bg-white px-4 py-5 md:px-6 md:py-8 border-b border-gray-100">
               <div className="border-b pb-5 mb-5">
                 <div className="flex items-start justify-between mb-3">
                   <h2 className="text-4xl md:text-5xl font-bold text-gray-900">{selectedWord.word}</h2>
@@ -954,7 +964,7 @@ function App() {
               </div>
 
               {selectedWord.necessity_ratings && (
-                <div className="mb-6 p-4 md:p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl">
+                <div className="mb-6 p-4 md:p-6 bg-gray-50 rounded-xl">
                   <h3 className="font-bold text-lg mb-3 text-gray-900">学習の重要度</h3>
                   <div className="grid grid-cols-2 gap-3">
                     {[['アメリカ英会話', selectedWord.necessity_ratings.american_conversation],
@@ -978,10 +988,10 @@ function App() {
               {selectedWord.meanings && selectedWord.meanings.map((meaning, idx) => (
                 <div key={idx} className="mb-6">
                   <div className="flex items-center space-x-3 mb-3">
-                    <span className="px-3 py-1.5 bg-gray-900 text-white rounded-full font-bold text-sm">{meaning.part_of_speech}</span>
+                    <span className="px-3 py-1.5 bg-gray-900 text-white rounded-full font-medium text-sm">{meaning.part_of_speech}</span>
                   </div>
                   {meaning.definitions && meaning.definitions.map((def, defIdx) => (
-                    <div key={defIdx} className="mb-5 pl-3 border-l-4 border-gray-200">
+                    <div key={defIdx} className="mb-5 pl-4 border-l-2 border-gray-200">
                       <h4 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">{def.definition}</h4>
                       {def.explanation && <p className="text-gray-700 leading-relaxed mb-3 text-sm md:text-base">{def.explanation}</p>}
                       {def.examples && def.examples.length > 0 && (
@@ -1042,7 +1052,7 @@ function App() {
             </div>
 
             {/* SNS投稿セクション */}
-            <div className="space-y-4">
+            <div className="px-4 py-4 space-y-4">
               <h3 className="text-lg md:text-xl font-bold text-gray-900 flex items-center space-x-2">
                 <MessageSquare className="w-5 h-5 md:w-6 md:h-6 text-gray-900" />
                 <span>みんなの投稿</span>
@@ -1055,7 +1065,7 @@ function App() {
                   <p className="text-sm">まだ投稿がありません。最初の投稿をしてみましょう！</p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div>
                   {wordPosts.map(post => (
                     <PostCard key={post.id} post={post} currentUser={user} onDelete={deletePost} onLoginRequired={() => setShowAuth(true)} />
                   ))}
@@ -1064,79 +1074,79 @@ function App() {
             </div>
           </div>
         )}
-        </div>{/* /px-0 */}
-        </div>{/* /メインコンテンツ */}
+        </div>{/* /main-inner */}
+        </div>{/* /メインカラム */}
 
-        {/* ===== 右サイドバー (xl以上のみ表示) ===== */}
-        <div className="hidden xl:block w-[350px] shrink-0 px-6 py-4">
+        {/* ===== 右サイドバー (lg以上で表示) ===== */}
+        <div className="hidden lg:block shrink-0 w-[290px] xl:w-[350px] px-4 xl:px-6 py-4 sticky top-0 h-screen overflow-y-auto">
           {/* 検索ボックス */}
-          <div className="sticky top-4 space-y-4">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="単語を検索..."
-                className="w-full pl-12 pr-10 py-3 bg-gray-100 border-0 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:bg-white transition-colors" />
-              {searchQuery && (
-                <button onClick={() => setSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2">
-                  <X className="w-4 h-4 text-gray-400" />
-                </button>
-              )}
-            </div>
-            {/* 統計カード */}
-            <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900 mb-3">HOWDEE</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600 text-sm">単語数</span>
-                  <span className="font-bold text-gray-900">{words.length}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600 text-sm">お気に入り</span>
-                  <span className="font-bold text-gray-900">{favorites.length}</span>
-                </div>
-              </div>
-            </div>
-            {/* ログインしていない場合 */}
-            {!user && (
-              <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200">
-                <h3 className="text-lg font-bold text-gray-900 mb-2">HOWDEEに参加しよう</h3>
-                <p className="text-gray-500 text-sm mb-4">お気に入り登録・投稿・コメントができます</p>
-                <button onClick={() => setShowAuth(true)}
-                  className="w-full py-2.5 bg-gray-900 text-white rounded-full font-bold text-sm hover:bg-black transition">
-                  アカウント作成
-                </button>
-                <button onClick={() => { setIsSignUp(false); setShowAuth(true); }}
-                  className="w-full py-2.5 mt-2 border border-gray-300 text-gray-700 rounded-full font-bold text-sm hover:bg-gray-50 transition">
-                  ログイン
-                </button>
-              </div>
+          <div className="relative mb-4">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="単語を検索..."
+              className="w-full pl-11 pr-9 py-2.5 bg-gray-100 border-0 rounded-full text-sm focus:outline-none focus:ring-1 focus:ring-gray-900 focus:bg-white transition-colors" />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2">
+                <X className="w-4 h-4 text-gray-400" />
+              </button>
             )}
           </div>
+          {/* 統計カード */}
+          <div className="bg-gray-50 rounded-2xl p-4 mb-4">
+            <h3 className="text-lg font-bold text-gray-900 mb-3">HOWDEE</h3>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-500 text-sm">単語数</span>
+                <span className="font-bold text-gray-900 text-sm">{words.length}</span>
+              </div>
+              {user && (
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500 text-sm">お気に入り</span>
+                  <span className="font-bold text-gray-900 text-sm">{favorites.length}</span>
+                </div>
+              )}
+            </div>
+          </div>
+          {/* 未ログイン時 */}
+          {!user && (
+            <div className="bg-gray-50 rounded-2xl p-4">
+              <h3 className="text-lg font-bold text-gray-900 mb-1">HOWDEEに参加しよう</h3>
+              <p className="text-gray-500 text-sm mb-4">お気に入り登録・投稿・コメントができます</p>
+              <button onClick={() => { setIsSignUp(true); setShowAuth(true); }}
+                className="w-full py-2.5 bg-gray-900 text-white rounded-full font-bold text-sm hover:bg-black transition mb-2">
+                アカウント作成
+              </button>
+              <button onClick={() => { setIsSignUp(false); setShowAuth(true); }}
+                className="w-full py-2.5 border border-gray-300 text-gray-700 rounded-full font-bold text-sm hover:bg-gray-50 transition">
+                ログイン
+              </button>
+            </div>
+          )}
         </div>
 
-      </div>{/* /3カラム */}
+      </div>{/* /3カラムレイアウト */}
 
-      {/* ===== モバイルボトムナビ ===== */}
-      <nav className="xl:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-30">
-        <div className="grid grid-cols-4 h-16">
+      {/* ===== モバイルボトムナビ (md未満) ===== */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-30">
+        <div className="grid grid-cols-4 h-14">
           <button onClick={() => navigateTo('list')}
-            className={`flex flex-col items-center justify-center space-y-1 transition ${currentView === 'list' ? 'text-gray-900' : 'text-gray-400'}`}>
-            <BookOpen className="w-6 h-6" />
+            className={`flex flex-col items-center justify-center space-y-0.5 transition ${currentView === 'list' && !showFavoritesOnly ? 'text-black' : 'text-gray-400'}`}>
+            <BookOpen className="w-5 h-5" />
             <span className="text-xs">単語</span>
           </button>
           <button onClick={() => navigateTo('feed')}
-            className={`flex flex-col items-center justify-center space-y-1 transition ${currentView === 'feed' ? 'text-gray-900' : 'text-gray-400'}`}>
-            <Rss className="w-6 h-6" />
+            className={`flex flex-col items-center justify-center space-y-0.5 transition ${currentView === 'feed' ? 'text-black' : 'text-gray-400'}`}>
+            <Rss className="w-5 h-5" />
             <span className="text-xs">投稿</span>
           </button>
           <button onClick={() => { if (user) { setShowFavoritesOnly(!showFavoritesOnly); navigateTo('list'); } else setShowAuth(true); }}
-            className={`flex flex-col items-center justify-center space-y-1 transition ${showFavoritesOnly ? 'text-red-500' : 'text-gray-400'}`}>
-            <Heart className={`w-6 h-6 ${showFavoritesOnly ? 'fill-current' : ''}`} />
+            className={`flex flex-col items-center justify-center space-y-0.5 transition ${showFavoritesOnly ? 'text-red-500' : 'text-gray-400'}`}>
+            <Heart className={`w-5 h-5 ${showFavoritesOnly ? 'fill-current' : ''}`} />
             <span className="text-xs">お気に入り</span>
           </button>
           <button onClick={() => { if (user) navigateTo('profile'); else setShowAuth(true); }}
-            className={`flex flex-col items-center justify-center space-y-1 transition ${currentView === 'profile' ? 'text-gray-900' : 'text-gray-400'}`}>
-            <User className="w-6 h-6" />
+            className={`flex flex-col items-center justify-center space-y-0.5 transition ${currentView === 'profile' ? 'text-black' : 'text-gray-400'}`}>
+            <User className="w-5 h-5" />
             <span className="text-xs">{user ? 'マイページ' : 'ログイン'}</span>
           </button>
         </div>
