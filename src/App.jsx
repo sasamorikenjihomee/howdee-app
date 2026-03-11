@@ -48,23 +48,23 @@ const ProfileEditModal = ({ user, profile, onClose, onSave }) => {
             <label className="block text-sm font-medium text-gray-700 mb-2">ユーザー名（@username）</label>
             <input type="text" value={username} onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))}
               placeholder="例: howdee_user"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-base" />
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-base outline-none transition-colors" />
             <p className="text-xs text-gray-400 mt-1">英数字とアンダースコアのみ使用可能</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">表示名</label>
             <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)}
               placeholder="例: HOWDEEユーザー"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-base" />
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-base outline-none transition-colors" />
           </div>
           {error && <p className="text-red-600 text-sm">{error}</p>}
           <div className="flex space-x-3 pt-2">
             <button type="button" onClick={onClose}
-              className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-base">
+              className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 text-base font-medium transition">
               キャンセル
             </button>
             <button type="submit" disabled={saving}
-              className="flex-1 px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-400 text-base">
+              className="flex-1 px-4 py-3 bg-gray-900 text-white rounded-full hover:bg-black disabled:bg-gray-400 text-base font-medium transition">
               {saving ? '保存中...' : '保存する'}
             </button>
           </div>
@@ -96,11 +96,11 @@ const ProfilePage = ({ user, profile, onEditProfile, currentUser, onLoginRequire
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 md:w-20 md:h-20 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <User className="w-8 h-8 md:w-10 md:h-10 text-indigo-600" />
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+              <User className="w-8 h-8 md:w-10 md:h-10 text-gray-500" />
             </div>
             <div>
               <h2 className="text-xl md:text-2xl font-bold text-gray-900">{displayName}</h2>
@@ -110,7 +110,7 @@ const ProfilePage = ({ user, profile, onEditProfile, currentUser, onLoginRequire
           </div>
           {isOwnProfile && (
             <button onClick={onEditProfile}
-              className="flex items-center space-x-1 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700 text-sm">
+              className="flex items-center space-x-1 px-3 py-2 border border-gray-300 rounded-full hover:bg-gray-50 text-gray-700 text-sm font-medium transition">
               <Edit2 className="w-4 h-4" />
               <span className="hidden sm:inline">編集</span>
             </button>
@@ -126,12 +126,12 @@ const ProfilePage = ({ user, profile, onEditProfile, currentUser, onLoginRequire
         {loading ? (
           <p className="text-center text-gray-500 py-8">読み込み中...</p>
         ) : userPosts.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-xl shadow">
+          <div className="text-center py-12 bg-white rounded-2xl border border-gray-200">
             <MessageSquare className="w-10 h-10 text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500">まだ投稿がありません</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-0 border border-gray-200 rounded-2xl overflow-hidden">
             {userPosts.map(post => (
               <PostCard key={post.id} post={post} currentUser={currentUser}
                 onDelete={async (postId) => {
@@ -194,7 +194,7 @@ const CommentSection = ({ postId, currentUser, onLoginRequired }) => {
 
   return (
     <div className="border-t border-gray-100 pt-3">
-      <button onClick={handleToggle} className="flex items-center space-x-2 text-sm text-gray-500 hover:text-indigo-600 transition py-1">
+      <button onClick={handleToggle} className="flex items-center space-x-2 text-sm text-gray-400 hover:text-gray-600 transition py-1">
         <MessageSquare className="w-4 h-4" />
         <span>コメント {comments.length > 0 ? `(${comments.length})` : ''}</span>
         {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -210,8 +210,8 @@ const CommentSection = ({ postId, currentUser, onLoginRequired }) => {
                   const date = new Date(comment.created_at).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
                   return (
                     <div key={comment.id} className="flex items-start space-x-2 pl-2">
-                      <div className="w-7 h-7 bg-indigo-50 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <User className="w-4 h-4 text-indigo-400" />
+                      <div className="w-7 h-7 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <User className="w-4 h-4 text-gray-500" />
                       </div>
                       <div className="flex-1 bg-gray-50 rounded-lg px-3 py-2">
                         <div className="flex items-center justify-between mb-1">
@@ -235,10 +235,10 @@ const CommentSection = ({ postId, currentUser, onLoginRequired }) => {
           <form onSubmit={handleSubmit} className="flex items-center space-x-2 pl-2">
             <input type="text" value={newComment} onChange={(e) => setNewComment(e.target.value)}
               placeholder={currentUser ? 'コメントを入力...' : 'ログインしてコメント'}
-              className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-full focus:ring-1 focus:ring-gray-900 focus:border-gray-900 transition-colors outline-none"
               disabled={!currentUser} onClick={!currentUser ? onLoginRequired : undefined} />
             <button type="submit" disabled={submitting || !currentUser || !newComment.trim()}
-              className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-200 disabled:cursor-not-allowed transition flex-shrink-0">
+              className="p-2 bg-gray-900 text-white rounded-full hover:bg-black disabled:bg-gray-200 disabled:cursor-not-allowed transition flex-shrink-0">
               <Send className="w-4 h-4" />
             </button>
           </form>
@@ -282,10 +282,10 @@ const LikeButton = ({ postId, currentUser, onLoginRequired }) => {
 
   return (
     <button onClick={handleToggle} disabled={loading}
-      className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg text-sm transition ${
-        liked ? 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100' : 'text-gray-400 hover:bg-gray-50 hover:text-indigo-500'
+      className={`flex items-center space-x-1.5 px-3 py-2 rounded-full text-sm transition ${
+        liked ? 'bg-blue-50 text-blue-500 hover:bg-blue-100' : 'text-gray-400 hover:bg-gray-100 hover:text-blue-400'
       }`}>
-      <ThumbsUp className={`w-4 h-4 ${liked ? 'fill-indigo-500 text-indigo-500' : ''}`} />
+      <ThumbsUp className={`w-4 h-4 ${liked ? 'fill-blue-500 text-blue-500' : ''}`} />
       <span>{likeCount > 0 ? `${likeCount} ` : ''}いいね</span>
     </button>
   );
@@ -300,11 +300,11 @@ const PostCard = ({ post, currentUser, onDelete, onLoginRequired, wordName }) =>
   });
 
   return (
-    <div className="bg-white rounded-xl shadow p-4 md:p-5 space-y-3">
+    <div className="bg-white border-b border-gray-200 px-4 py-4 space-y-3 hover:bg-gray-50/50 transition-colors">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3 min-w-0">
-          <div className="w-9 h-9 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
-            <User className="w-5 h-5 text-indigo-600" />
+          <div className="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+            <User className="w-5 h-5 text-gray-500" />
           </div>
           <div className="min-w-0">
             <p className="text-sm font-medium text-gray-800 truncate">{post.user_email || '匿名ユーザー'}</p>
@@ -312,7 +312,7 @@ const PostCard = ({ post, currentUser, onDelete, onLoginRequired, wordName }) =>
           </div>
         </div>
         <div className="flex items-center space-x-2 flex-shrink-0 ml-2">
-          {wordName && <span className="hidden sm:inline px-2 py-1 bg-indigo-50 text-indigo-600 text-xs rounded-full font-medium">{wordName}</span>}
+          {wordName && <span className="hidden sm:inline px-2.5 py-1 bg-blue-50 text-blue-600 text-xs rounded-full font-medium">{wordName}</span>}
           {isOwner && (
             <button onClick={() => onDelete(post.id)} className="p-2 hover:bg-red-50 rounded-full text-gray-400 hover:text-red-500 transition">
               <Trash2 className="w-4 h-4" />
@@ -320,7 +320,7 @@ const PostCard = ({ post, currentUser, onDelete, onLoginRequired, wordName }) =>
           )}
         </div>
       </div>
-      {wordName && <span className="sm:hidden inline-block px-2 py-1 bg-indigo-50 text-indigo-600 text-xs rounded-full font-medium">{wordName}</span>}
+      {wordName && <span className="sm:hidden inline-block px-2.5 py-1 bg-blue-50 text-blue-600 text-xs rounded-full font-medium">{wordName}</span>}
       <p className="text-gray-800 whitespace-pre-wrap text-sm md:text-base">{post.content}</p>
       {videoId && (
         <div className="aspect-video rounded-lg overflow-hidden">
@@ -353,27 +353,27 @@ const PostForm = ({ user, onSubmit, onLoginRequired }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow p-4 md:p-5">
+    <div className="bg-white border border-gray-200 rounded-2xl p-4 md:p-5">
       <h4 className="font-bold text-gray-900 mb-3 flex items-center space-x-2 text-sm md:text-base">
         <MessageSquare className="w-5 h-5 text-indigo-600" />
         <span>この単語について投稿する</span>
       </h4>
       {!user && (
         <p className="text-sm text-gray-500 mb-3">
-          投稿するには<button onClick={onLoginRequired} className="text-indigo-600 underline mx-1">ログイン</button>が必要です
+          投稿するには<button onClick={onLoginRequired} className="text-blue-500 hover:underline mx-1 font-medium">ログイン</button>が必要です
         </p>
       )}
       <form onSubmit={handleSubmit} className="space-y-3">
         <textarea value={content} onChange={(e) => setContent(e.target.value)}
           placeholder="この単語の使い方、覚え方、エピソードなど..."
-          className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none text-sm md:text-base"
+          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-1 focus:ring-gray-900 focus:border-gray-900 resize-none text-sm md:text-base transition-colors outline-none"
           rows={3} disabled={!user} />
         <input type="url" value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)}
           placeholder="YouTube URL（任意）"
-          className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm md:text-base"
+          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-sm md:text-base transition-colors outline-none"
           disabled={!user} />
         <button type="submit" disabled={submitting || !user || !content.trim()}
-          className="flex items-center space-x-2 px-5 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition text-sm md:text-base font-medium w-full justify-center sm:w-auto">
+          className="flex items-center space-x-2 px-5 py-2.5 bg-gray-900 text-white rounded-full hover:bg-black disabled:bg-gray-300 disabled:cursor-not-allowed transition text-sm font-medium w-full justify-center sm:w-auto">
           <Send className="w-4 h-4" />
           <span>{submitting ? '投稿中...' : '投稿する'}</span>
         </button>
@@ -561,14 +561,14 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-xl text-gray-600">Loading...</div>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-sm text-gray-400 tracking-widest uppercase">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 pb-20 md:pb-0">
+    <div className="min-h-screen bg-[#F7F9F9] pb-20 md:pb-0">
 
       {/* 認証モーダル */}
       {showAuth && (
@@ -582,21 +582,21 @@ function App() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">メールアドレス</label>
                 <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-base" required />
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-base outline-none transition-colors" required />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">パスワード</label>
                 <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-base" required minLength={6} />
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-base outline-none transition-colors" required minLength={6} />
               </div>
               {authError && <div className="text-red-600 text-sm">{authError}</div>}
               <button type="submit" disabled={authLoading}
-                className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 disabled:bg-gray-400 font-medium text-base">
+                className="w-full bg-gray-900 text-white py-3 rounded-full hover:bg-black disabled:bg-gray-400 font-medium text-base transition">
                 {authLoading ? '処理中...' : (isSignUp ? 'アカウント作成' : 'ログイン')}
               </button>
             </form>
             <div className="mt-4 text-center">
-              <button onClick={() => setIsSignUp(!isSignUp)} className="text-indigo-600 hover:text-indigo-700 text-sm">
+              <button onClick={() => setIsSignUp(!isSignUp)} className="text-blue-500 hover:text-blue-600 text-sm font-medium">
                 {isSignUp ? 'すでにアカウントをお持ちの方はこちら' : 'アカウントを作成する'}
               </button>
             </div>
@@ -621,9 +621,9 @@ function App() {
             </div>
             {user ? (
               <div className="space-y-2">
-                <div className="flex items-center space-x-3 p-3 bg-indigo-50 rounded-lg mb-4">
-                  <div className="w-10 h-10 bg-indigo-200 rounded-full flex items-center justify-center">
-                    <User className="w-5 h-5 text-indigo-700" />
+                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-2xl mb-4">
+                  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                    <User className="w-5 h-5 text-gray-600" />
                   </div>
                   <div className="min-w-0">
                     <p className="font-medium text-gray-900 text-sm truncate">{profile?.display_name || profile?.username || 'ユーザー'}</p>
@@ -654,7 +654,7 @@ function App() {
               </div>
             ) : (
               <button onClick={() => { setShowAuth(true); setShowMobileMenu(false); }}
-                className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gray-900 text-white rounded-full hover:bg-black font-medium transition">
                 <User className="w-5 h-5" />
                 <span>ログイン / アカウント作成</span>
               </button>
@@ -664,7 +664,7 @@ function App() {
       )}
 
       {/* ===== ヘッダー ===== */}
-      <header className="bg-white shadow-sm sticky top-0 z-30">
+      <header className="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             {/* 左側 */}
@@ -675,7 +675,7 @@ function App() {
                 </button>
               )}
               <button onClick={() => navigateTo('list')} className="flex items-center space-x-2 hover:opacity-80 transition">
-                <BookOpen className="w-7 h-7 text-indigo-600" />
+                <BookOpen className="w-7 h-7 text-gray-900" />
                 <span className="hidden sm:block text-xl md:text-2xl font-bold text-gray-900">HOWDEE</span>
                 <span className="sm:hidden text-lg font-bold text-gray-900">HOWDEE</span>
               </button>
@@ -687,7 +687,7 @@ function App() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="単語を検索..."
-                  className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" />
+                  className="w-full pl-10 pr-10 py-2 bg-[#EFF3F4] border-0 rounded-full text-sm focus:ring-1 focus:ring-gray-900 focus:bg-white transition-colors outline-none" />
                 {searchQuery && (
                   <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full">
                     <X className="w-4 h-4 text-gray-400" />
@@ -699,28 +699,28 @@ function App() {
             {/* 右側：デスクトップナビ */}
             <div className="hidden md:flex items-center space-x-3">
               <button onClick={() => navigateTo('feed')}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition ${currentView === 'feed' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition ${currentView === 'feed' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
                 <Rss className="w-5 h-5" />
                 <span>みんなの投稿</span>
               </button>
               {user ? (
                 <>
                   <button onClick={() => { setShowFavoritesOnly(!showFavoritesOnly); navigateTo('list'); }}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition ${showFavoritesOnly ? 'bg-red-100 text-red-700 border-2 border-red-400' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition ${showFavoritesOnly ? 'bg-red-500 text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
                     <Heart className={`w-5 h-5 ${showFavoritesOnly ? 'fill-current' : ''}`} />
                     <span>お気に入り ({favorites.length})</span>
                   </button>
                   <button onClick={() => navigateTo('profile')}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition ${currentView === 'profile' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition ${currentView === 'profile' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
                     <User className="w-5 h-5" />
                     <span>{profile?.display_name || profile?.username || 'マイページ'}</span>
                   </button>
-                  <button onClick={handleSignOut} className="p-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                  <button onClick={handleSignOut} className="p-2 text-gray-500 rounded-full hover:bg-gray-100 transition">
                     <LogOut className="w-5 h-5" />
                   </button>
                 </>
               ) : (
-                <button onClick={() => setShowAuth(true)} className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                <button onClick={() => setShowAuth(true)} className="flex items-center space-x-2 px-5 py-2 bg-gray-900 text-white rounded-full text-sm font-medium hover:bg-black transition">
                   <User className="w-5 h-5" />
                   <span>ログイン</span>
                 </button>
@@ -745,7 +745,7 @@ function App() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input id="mobile-search" type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="単語を検索..."
-                className="w-full pl-9 pr-9 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm" />
+                className="w-full pl-9 pr-9 py-2 bg-[#EFF3F4] border-0 rounded-full text-sm focus:ring-1 focus:ring-gray-900 focus:bg-white transition-colors outline-none" />
               {searchQuery && (
                 <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 transform -translate-y-1/2">
                   <X className="w-4 h-4 text-gray-400" />
@@ -767,18 +767,20 @@ function App() {
 
         {/* フィードページ */}
         {currentView === 'feed' && (
-          <div className="max-w-2xl mx-auto">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-4">みんなの投稿</h2>
+          <div className="max-w-2xl mx-auto bg-white rounded-2xl border border-gray-200 overflow-hidden">
+            <div className="px-4 py-4 border-b border-gray-100">
+              <h2 className="text-lg font-bold text-gray-900">みんなの投稿</h2>
+            </div>
             {feedLoading ? (
-              <p className="text-center text-gray-500 py-12">読み込み中...</p>
+              <p className="text-center text-gray-400 py-12 text-sm">読み込み中...</p>
             ) : feedPosts.length === 0 ? (
               <div className="text-center py-16">
-                <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <MessageSquare className="w-12 h-12 text-gray-200 mx-auto mb-3" />
                 <p className="text-gray-500">まだ投稿がありません</p>
                 <p className="text-sm text-gray-400 mt-1">単語の詳細ページから投稿してみましょう！</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div>
                 {feedPosts.map(post => (
                   <PostCard key={post.id} post={post} currentUser={user} onDelete={deletePost}
                     onLoginRequired={() => setShowAuth(true)} wordName={post.words?.word} />
@@ -807,7 +809,7 @@ function App() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {filteredWords.map((word) => (
-                  <div key={word.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition cursor-pointer active:scale-95">
+                  <div key={word.id} className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:border-gray-300 hover:shadow-sm transition cursor-pointer active:scale-95">
                     {word.youtube_shorts && word.youtube_shorts.length > 0 && (
                       <div className="relative h-44 bg-gray-200" onClick={() => openWordDetail(word)}>
                         <img src={`https://img.youtube.com/vi/${word.youtube_shorts[0]}/mqdefault.jpg`} alt={word.word} className="w-full h-full object-cover" />
@@ -827,7 +829,7 @@ function App() {
                     </div>
                     <div className="px-4 pb-4">
                       <button onClick={(e) => { e.stopPropagation(); toggleFavorite(word.id); }}
-                        className="w-full flex items-center justify-center space-x-2 py-2.5 border-2 border-gray-200 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition text-sm">
+                        className="w-full flex items-center justify-center space-x-2 py-2.5 border border-gray-200 rounded-full hover:bg-gray-50 active:bg-gray-100 transition text-sm font-medium">
                         <Heart className={`w-4 h-4 ${favorites.includes(word.id) ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
                         <span className="text-gray-700">{favorites.includes(word.id) ? 'お気に入り済み' : 'お気に入りに追加'}</span>
                       </button>
@@ -843,14 +845,14 @@ function App() {
         {currentView === 'detail' && selectedWord && (
           <div className="space-y-4 max-w-4xl mx-auto">
             {selectedWord.youtube_shorts && selectedWord.youtube_shorts.length > 0 && (
-              <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+              <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
                 <div className="aspect-video">
                   <iframe width="100%" height="100%" src={`https://www.youtube.com/embed/${selectedWord.youtube_shorts[0]}`}
                     frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
                 </div>
               </div>
             )}
-            <div className="bg-white rounded-xl shadow-lg p-5 md:p-8">
+            <div className="bg-white rounded-2xl border border-gray-200 p-5 md:p-8">
               <div className="border-b pb-5 mb-5">
                 <div className="flex items-start justify-between mb-3">
                   <h2 className="text-4xl md:text-5xl font-bold text-gray-900">{selectedWord.word}</h2>
@@ -864,14 +866,14 @@ function App() {
                       <div className="flex items-center space-x-2">
                         <span className="text-gray-500 text-sm">🇺🇸</span>
                         <span className="font-mono text-base md:text-lg">{selectedWord.pronunciations.us.ipa}</span>
-                        <button className="p-1.5 hover:bg-gray-100 rounded-full"><Volume2 className="w-4 h-4 text-indigo-600" /></button>
+                        <button className="p-1.5 hover:bg-gray-100 rounded-full"><Volume2 className="w-4 h-4 text-gray-500" /></button>
                       </div>
                     )}
                     {selectedWord.pronunciations.uk?.ipa && (
                       <div className="flex items-center space-x-2">
                         <span className="text-gray-500 text-sm">🇬🇧</span>
                         <span className="font-mono text-base md:text-lg">{selectedWord.pronunciations.uk.ipa}</span>
-                        <button className="p-1.5 hover:bg-gray-100 rounded-full"><Volume2 className="w-4 h-4 text-indigo-600" /></button>
+                        <button className="p-1.5 hover:bg-gray-100 rounded-full"><Volume2 className="w-4 h-4 text-gray-500" /></button>
                       </div>
                     )}
                   </div>
@@ -879,7 +881,7 @@ function App() {
               </div>
 
               {selectedWord.necessity_ratings && (
-                <div className="mb-6 p-4 md:p-6 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl">
+                <div className="mb-6 p-4 md:p-6 bg-gray-50 rounded-2xl border border-gray-100">
                   <h3 className="font-bold text-lg mb-3 text-gray-900">学習の重要度</h3>
                   <div className="grid grid-cols-2 gap-3">
                     {[['アメリカ英会話', selectedWord.necessity_ratings.american_conversation],
@@ -903,10 +905,10 @@ function App() {
               {selectedWord.meanings && selectedWord.meanings.map((meaning, idx) => (
                 <div key={idx} className="mb-6">
                   <div className="flex items-center space-x-3 mb-3">
-                    <span className="px-3 py-1.5 bg-indigo-600 text-white rounded-full font-bold text-sm">{meaning.part_of_speech}</span>
+                    <span className="px-3 py-1.5 bg-gray-900 text-white rounded-full font-medium text-sm">{meaning.part_of_speech}</span>
                   </div>
                   {meaning.definitions && meaning.definitions.map((def, defIdx) => (
-                    <div key={defIdx} className="mb-5 pl-3 border-l-4 border-indigo-200">
+                    <div key={defIdx} className="mb-5 pl-4 border-l-2 border-gray-200">
                       <h4 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">{def.definition}</h4>
                       {def.explanation && <p className="text-gray-700 leading-relaxed mb-3 text-sm md:text-base">{def.explanation}</p>}
                       {def.examples && def.examples.length > 0 && (
@@ -914,10 +916,10 @@ function App() {
                           <p className="font-semibold text-gray-800 text-sm">例文：</p>
                           {def.examples.map((example, exIdx) => (
                             <div key={exIdx} className="flex items-start space-x-2 bg-gray-50 p-3 rounded-lg">
-                              <div className="flex-shrink-0 w-5 h-5 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xs">{exIdx + 1}</div>
+                              <div className="flex-shrink-0 w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 font-bold text-xs">{exIdx + 1}</div>
                               <p className="text-gray-800 italic flex-1 text-sm">{example}</p>
                               <button className="flex-shrink-0 p-1 hover:bg-gray-200 rounded-full">
-                                <Volume2 className="w-4 h-4 text-indigo-600" />
+                                <Volume2 className="w-4 h-4 text-gray-400" />
                               </button>
                             </div>
                           ))}
@@ -969,7 +971,7 @@ function App() {
             {/* SNS投稿セクション */}
             <div className="space-y-4">
               <h3 className="text-lg md:text-xl font-bold text-gray-900 flex items-center space-x-2">
-                <MessageSquare className="w-5 h-5 md:w-6 md:h-6 text-indigo-600" />
+                <MessageSquare className="w-5 h-5 md:w-6 md:h-6 text-gray-500" />
                 <span>みんなの投稿</span>
                 <span className="text-sm font-normal text-gray-500">({wordPosts.length}件)</span>
               </h3>
@@ -980,7 +982,7 @@ function App() {
                   <p className="text-sm">まだ投稿がありません。最初の投稿をしてみましょう！</p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-0 border border-gray-200 rounded-2xl overflow-hidden">
                   {wordPosts.map(post => (
                     <PostCard key={post.id} post={post} currentUser={user} onDelete={deletePost} onLoginRequired={() => setShowAuth(true)} />
                   ))}
@@ -995,12 +997,12 @@ function App() {
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-30 safe-area-bottom">
         <div className="grid grid-cols-4 h-16">
           <button onClick={() => navigateTo('list')}
-            className={`flex flex-col items-center justify-center space-y-1 transition ${currentView === 'list' ? 'text-indigo-600' : 'text-gray-400'}`}>
+            className={`flex flex-col items-center justify-center space-y-1 transition ${currentView === 'list' ? 'text-gray-900' : 'text-gray-400'}`}>
             <BookOpen className="w-6 h-6" />
             <span className="text-xs">単語</span>
           </button>
           <button onClick={() => navigateTo('feed')}
-            className={`flex flex-col items-center justify-center space-y-1 transition ${currentView === 'feed' ? 'text-indigo-600' : 'text-gray-400'}`}>
+            className={`flex flex-col items-center justify-center space-y-1 transition ${currentView === 'feed' ? 'text-gray-900' : 'text-gray-400'}`}>
             <Rss className="w-6 h-6" />
             <span className="text-xs">投稿</span>
           </button>
@@ -1010,7 +1012,7 @@ function App() {
             <span className="text-xs">お気に入り</span>
           </button>
           <button onClick={() => { if (user) navigateTo('profile'); else setShowAuth(true); }}
-            className={`flex flex-col items-center justify-center space-y-1 transition ${currentView === 'profile' ? 'text-indigo-600' : 'text-gray-400'}`}>
+            className={`flex flex-col items-center justify-center space-y-1 transition ${currentView === 'profile' ? 'text-gray-900' : 'text-gray-400'}`}>
             <User className="w-6 h-6" />
             <span className="text-xs">{user ? 'マイページ' : 'ログイン'}</span>
           </button>
