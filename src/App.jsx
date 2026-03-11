@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Volume2, BookOpen, Star, Search, X, Heart, LogOut, User, ArrowLeft, MessageSquare, Send, Trash2, Rss, ChevronDown, ChevronUp, ThumbsUp, Edit2, Menu } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -11,6 +11,77 @@ const extractYouTubeId = (url) => {
   if (!url) return null;
   const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([a-zA-Z0-9_-]{11})/);
   return match ? match[1] : null;
+};
+
+// ===== 動画プレイヤー（スクロール自動再生） =====
+const WordVideoPlayer = ({ videoId }) => {
+  const containerRef = useRef(null);
+  const [state, setState] = useState('thumbnail'); // 'thumbnail' | 'autoplay' | 'controls'
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          // このビデオが画面に入ったことをグローバルに通知
+          window.dispatchEvent(new CustomEvent('howdee:videoInView', { detail: { id: videoId } }));
+        }
+      },
+      { threshold: 0.6 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [videoId]);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (state === 'controls') return; // ユーザーが操作中は変えない
+      setState(e.detail.id === videoId ? 'autoplay' : 'thumbnail');
+    };
+    window.addEventListener('howdee:videoInView', handler);
+    return () => window.removeEventListener('howdee:videoInView', handler);
+  }, [videoId, state]);
+
+  const handleClick = (e) => {
+    e.stopPropagation();
+    setState('controls');
+  };
+
+  // w7:h8 比率 = 8/7 * 100 ≈ 114.3%
+  const ratio = `${(8 / 7) * 100}%`;
+
+  return (
+    <div ref={containerRef}
+      className="relative w-full rounded-2xl overflow-hidden bg-gray-100 mb-3"
+      style={{ paddingBottom: ratio }}
+      onClick={handleClick}>
+      {state === 'thumbnail' ? (
+        <>
+          <img
+            src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
+            alt="video thumbnail"
+            className="absolute inset-0 w-full h-full object-cover object-center"
+            onError={(e) => { e.target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`; }}
+          />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-12 h-12 bg-red-600 bg-opacity-90 rounded-full flex items-center justify-center shadow-lg">
+              <div className="w-0 h-0 border-l-[10px] border-l-white border-t-[7px] border-t-transparent border-b-[7px] border-b-transparent ml-1"></div>
+            </div>
+          </div>
+        </>
+      ) : (
+        <iframe
+          className="absolute inset-0 w-full h-full"
+          src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=${state === 'controls' ? 1 : 0}&playsinline=1&rel=0&modestbranding=1`}
+          allow="autoplay; encrypted-media; picture-in-picture"
+          allowFullScreen
+          title="video"
+        />
+      )}
+    </div>
+  );
 };
 
 // ===== プロフィール編集モーダル =====
@@ -892,45 +963,34 @@ function App() {
             ) : (
               <div>
                 {filteredWords.map((word) => (
-                  <div key={word.id} className="bg-white border-b border-gray-200 hover:bg-gray-50/50 transition cursor-pointer">
+                  <div key={word.id} className="bg-white border-b border-gray-200 hover:bg-gray-50/50 transition">
                     {/* X風：左アイコン＋右コンテンツ */}
                     <div className="flex px-4 pt-4 pb-3 space-x-3">
-                      {/* 左：HOWDEEアカウントアイコン */}
-                      <div className="shrink-0" onClick={() => openWordDetail(word)}>
+                      {/* 左：HOWDEEアカウントアイコン（クリックで詳細へ） */}
+                      <div className="shrink-0 cursor-pointer" onClick={() => openWordDetail(word)}>
                         <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center">
                           <BookOpen className="w-5 h-5 text-white" />
                         </div>
                       </div>
                       {/* 右：コンテンツ */}
-                      <div className="flex-1 min-w-0" onClick={() => openWordDetail(word)}>
-                        {/* ヘッダー行：単語名＋発音記号 */}
-                        <div className="flex items-baseline space-x-2 mb-1">
-                          <span className="font-bold text-gray-900 text-lg leading-tight">{word.word}</span>
-                          {word.pronunciations?.us?.ipa && (
-                            <span className="text-gray-400 text-sm">{word.pronunciations.us.ipa}</span>
+                      <div className="flex-1 min-w-0">
+                        {/* 単語名＋発音記号（クリックで詳細へ） */}
+                        <div className="cursor-pointer" onClick={() => openWordDetail(word)}>
+                          <div className="flex items-baseline space-x-2 mb-1">
+                            <span className="font-bold text-gray-900 text-lg leading-tight">{word.word}</span>
+                            {word.pronunciations?.us?.ipa && (
+                              <span className="text-gray-400 text-sm">{word.pronunciations.us.ipa}</span>
+                            )}
+                          </div>
+                          {word.meanings?.[0]?.definitions?.[0] && (
+                            <p className="text-gray-700 text-sm leading-relaxed line-clamp-2 mb-2">
+                              {word.meanings[0].definitions[0].definition}
+                            </p>
                           )}
                         </div>
-                        {/* 意味 */}
-                        {word.meanings?.[0]?.definitions?.[0] && (
-                          <p className="text-gray-700 text-sm leading-relaxed line-clamp-2 mb-2">
-                            {word.meanings[0].definitions[0].definition}
-                          </p>
-                        )}
-                        {/* 動画サムネイル（w2:h3＝縦長、横100%） */}
+                        {/* 動画（クリックはWordVideoPlayer内で制御） */}
                         {word.youtube_shorts && word.youtube_shorts.length > 0 && (
-                          <div className="relative w-full rounded-2xl overflow-hidden bg-gray-100 mb-3"
-                            style={{ paddingBottom: '150%' }}>
-                            <img
-                              src={`https://img.youtube.com/vi/${word.youtube_shorts[0]}/mqdefault.jpg`}
-                              alt={word.word}
-                              className="absolute inset-0 w-full h-full object-cover"
-                            />
-                            <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
-                              <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
-                                <div className="w-0 h-0 border-l-[10px] border-l-white border-t-[7px] border-t-transparent border-b-[7px] border-b-transparent ml-1"></div>
-                              </div>
-                            </div>
-                          </div>
+                          <WordVideoPlayer videoId={word.youtube_shorts[0]} />
                         )}
                         {/* アクションバー */}
                         <div className="flex items-center -ml-2">
