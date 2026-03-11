@@ -48,14 +48,14 @@ const ProfileEditModal = ({ user, profile, onClose, onSave }) => {
             <label className="block text-sm font-medium text-gray-700 mb-2">ユーザー名（@username）</label>
             <input type="text" value={username} onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))}
               placeholder="例: howdee_user"
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-base outline-none transition-colors" />
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-1 focus:ring-gray-900 focus:border-gray-900 focus:outline-none text-base transition-colors" />
             <p className="text-xs text-gray-400 mt-1">英数字とアンダースコアのみ使用可能</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">表示名</label>
             <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)}
               placeholder="例: HOWDEEユーザー"
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-base outline-none transition-colors" />
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-1 focus:ring-gray-900 focus:border-gray-900 focus:outline-none text-base transition-colors" />
           </div>
           {error && <p className="text-red-600 text-sm">{error}</p>}
           <div className="flex space-x-3 pt-2">
@@ -131,7 +131,7 @@ const ProfilePage = ({ user, profile, onEditProfile, currentUser, onLoginRequire
             <p className="text-gray-500">まだ投稿がありません</p>
           </div>
         ) : (
-          <div className="space-y-0 border border-gray-200 rounded-2xl overflow-hidden">
+          <div className="space-y-4">
             {userPosts.map(post => (
               <PostCard key={post.id} post={post} currentUser={currentUser}
                 onDelete={async (postId) => {
@@ -235,7 +235,7 @@ const CommentSection = ({ postId, currentUser, onLoginRequired }) => {
           <form onSubmit={handleSubmit} className="flex items-center space-x-2 pl-2">
             <input type="text" value={newComment} onChange={(e) => setNewComment(e.target.value)}
               placeholder={currentUser ? 'コメントを入力...' : 'ログインしてコメント'}
-              className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-full focus:ring-1 focus:ring-gray-900 focus:border-gray-900 transition-colors outline-none"
+              className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-full focus:ring-1 focus:ring-gray-900 focus:border-gray-900 focus:outline-none transition-colors"
               disabled={!currentUser} onClick={!currentUser ? onLoginRequired : undefined} />
             <button type="submit" disabled={submitting || !currentUser || !newComment.trim()}
               className="p-2 bg-gray-900 text-white rounded-full hover:bg-black disabled:bg-gray-200 disabled:cursor-not-allowed transition flex-shrink-0">
@@ -300,7 +300,7 @@ const PostCard = ({ post, currentUser, onDelete, onLoginRequired, wordName }) =>
   });
 
   return (
-    <div className="bg-white border-b border-gray-200 px-4 py-4 space-y-3 hover:bg-gray-50/50 transition-colors">
+    <div className="bg-white border-b border-gray-200 px-4 py-4 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3 min-w-0">
           <div className="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
@@ -312,7 +312,7 @@ const PostCard = ({ post, currentUser, onDelete, onLoginRequired, wordName }) =>
           </div>
         </div>
         <div className="flex items-center space-x-2 flex-shrink-0 ml-2">
-          {wordName && <span className="hidden sm:inline px-2.5 py-1 bg-blue-50 text-blue-600 text-xs rounded-full font-medium">{wordName}</span>}
+          {wordName && <span className="hidden sm:inline px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-full font-medium">{wordName}</span>}
           {isOwner && (
             <button onClick={() => onDelete(post.id)} className="p-2 hover:bg-red-50 rounded-full text-gray-400 hover:text-red-500 transition">
               <Trash2 className="w-4 h-4" />
@@ -320,7 +320,7 @@ const PostCard = ({ post, currentUser, onDelete, onLoginRequired, wordName }) =>
           )}
         </div>
       </div>
-      {wordName && <span className="sm:hidden inline-block px-2.5 py-1 bg-blue-50 text-blue-600 text-xs rounded-full font-medium">{wordName}</span>}
+      {wordName && <span className="sm:hidden inline-block px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-full font-medium">{wordName}</span>}
       <p className="text-gray-800 whitespace-pre-wrap text-sm md:text-base">{post.content}</p>
       {videoId && (
         <div className="aspect-video rounded-lg overflow-hidden">
@@ -355,7 +355,7 @@ const PostForm = ({ user, onSubmit, onLoginRequired }) => {
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-4 md:p-5">
       <h4 className="font-bold text-gray-900 mb-3 flex items-center space-x-2 text-sm md:text-base">
-        <MessageSquare className="w-5 h-5 text-indigo-600" />
+        <MessageSquare className="w-5 h-5 text-gray-500" />
         <span>この単語について投稿する</span>
       </h4>
       {!user && (
@@ -366,11 +366,11 @@ const PostForm = ({ user, onSubmit, onLoginRequired }) => {
       <form onSubmit={handleSubmit} className="space-y-3">
         <textarea value={content} onChange={(e) => setContent(e.target.value)}
           placeholder="この単語の使い方、覚え方、エピソードなど..."
-          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-1 focus:ring-gray-900 focus:border-gray-900 resize-none text-sm md:text-base transition-colors outline-none"
+          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-1 focus:ring-gray-900 focus:border-gray-900 focus:outline-none resize-none text-sm md:text-base transition-colors"
           rows={3} disabled={!user} />
         <input type="url" value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)}
           placeholder="YouTube URL（任意）"
-          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-sm md:text-base transition-colors outline-none"
+          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-1 focus:ring-gray-900 focus:border-gray-900 focus:outline-none text-sm md:text-base transition-colors"
           disabled={!user} />
         <button type="submit" disabled={submitting || !user || !content.trim()}
           className="flex items-center space-x-2 px-5 py-2.5 bg-gray-900 text-white rounded-full hover:bg-black disabled:bg-gray-300 disabled:cursor-not-allowed transition text-sm font-medium w-full justify-center sm:w-auto">
@@ -562,13 +562,13 @@ function App() {
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-sm text-gray-400 tracking-widest uppercase">Loading...</div>
+        <div className="text-sm text-gray-400 tracking-widest">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F9F9] pb-20 md:pb-0">
+    <div className="min-h-screen bg-gray-50 pb-20 md:pb-0">
 
       {/* 認証モーダル */}
       {showAuth && (
@@ -582,12 +582,12 @@ function App() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">メールアドレス</label>
                 <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-base outline-none transition-colors" required />
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-1 focus:ring-gray-900 focus:border-gray-900 focus:outline-none text-base transition-colors" required />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">パスワード</label>
                 <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-base outline-none transition-colors" required minLength={6} />
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-1 focus:ring-gray-900 focus:border-gray-900 focus:outline-none text-base transition-colors" required minLength={6} />
               </div>
               {authError && <div className="text-red-600 text-sm">{authError}</div>}
               <button type="submit" disabled={authLoading}
@@ -654,7 +654,7 @@ function App() {
               </div>
             ) : (
               <button onClick={() => { setShowAuth(true); setShowMobileMenu(false); }}
-                className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gray-900 text-white rounded-full hover:bg-black font-medium transition">
+                className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gray-900 text-white rounded-full font-medium hover:bg-black transition">
                 <User className="w-5 h-5" />
                 <span>ログイン / アカウント作成</span>
               </button>
@@ -664,7 +664,7 @@ function App() {
       )}
 
       {/* ===== ヘッダー ===== */}
-      <header className="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-30">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             {/* 左側 */}
@@ -687,7 +687,7 @@ function App() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="単語を検索..."
-                  className="w-full pl-10 pr-10 py-2 bg-[#EFF3F4] border-0 rounded-full text-sm focus:ring-1 focus:ring-gray-900 focus:bg-white transition-colors outline-none" />
+                  className="w-full pl-10 pr-10 py-2 bg-gray-100 border-0 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:bg-white transition-colors" />
                 {searchQuery && (
                   <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full">
                     <X className="w-4 h-4 text-gray-400" />
@@ -745,7 +745,7 @@ function App() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input id="mobile-search" type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="単語を検索..."
-                className="w-full pl-9 pr-9 py-2 bg-[#EFF3F4] border-0 rounded-full text-sm focus:ring-1 focus:ring-gray-900 focus:bg-white transition-colors outline-none" />
+                className="w-full pl-9 pr-9 py-2 bg-gray-100 border-0 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:bg-white transition-colors" />
               {searchQuery && (
                 <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 transform -translate-y-1/2">
                   <X className="w-4 h-4 text-gray-400" />
@@ -767,20 +767,18 @@ function App() {
 
         {/* フィードページ */}
         {currentView === 'feed' && (
-          <div className="max-w-2xl mx-auto bg-white rounded-2xl border border-gray-200 overflow-hidden">
-            <div className="px-4 py-4 border-b border-gray-100">
-              <h2 className="text-lg font-bold text-gray-900">みんなの投稿</h2>
-            </div>
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-4">みんなの投稿</h2>
             {feedLoading ? (
-              <p className="text-center text-gray-400 py-12 text-sm">読み込み中...</p>
+              <p className="text-center text-gray-500 py-12">読み込み中...</p>
             ) : feedPosts.length === 0 ? (
               <div className="text-center py-16">
-                <MessageSquare className="w-12 h-12 text-gray-200 mx-auto mb-3" />
+                <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                 <p className="text-gray-500">まだ投稿がありません</p>
                 <p className="text-sm text-gray-400 mt-1">単語の詳細ページから投稿してみましょう！</p>
               </div>
             ) : (
-              <div>
+              <div className="space-y-4">
                 {feedPosts.map(post => (
                   <PostCard key={post.id} post={post} currentUser={user} onDelete={deletePost}
                     onLoginRequired={() => setShowAuth(true)} wordName={post.words?.word} />
@@ -802,7 +800,7 @@ function App() {
             {filteredWords.length === 0 ? (
               <div className="text-center py-16">
                 <p className="text-gray-500 mb-4">{showFavoritesOnly ? 'お気に入りがありません' : '検索結果がありません'}</p>
-                <button onClick={() => { setSearchQuery(''); setShowFavoritesOnly(false); }} className="text-indigo-600 hover:text-indigo-700 underline">
+                <button onClick={() => { setSearchQuery(''); setShowFavoritesOnly(false); }} className="text-blue-500 hover:text-blue-600 font-medium">
                   すべて表示
                 </button>
               </div>
@@ -829,7 +827,7 @@ function App() {
                     </div>
                     <div className="px-4 pb-4">
                       <button onClick={(e) => { e.stopPropagation(); toggleFavorite(word.id); }}
-                        className="w-full flex items-center justify-center space-x-2 py-2.5 border border-gray-200 rounded-full hover:bg-gray-50 active:bg-gray-100 transition text-sm font-medium">
+                        className="w-full flex items-center justify-center space-x-2 py-2.5 border border-gray-200 rounded-full hover:bg-gray-50 active:bg-gray-100 transition text-sm">
                         <Heart className={`w-4 h-4 ${favorites.includes(word.id) ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
                         <span className="text-gray-700">{favorites.includes(word.id) ? 'お気に入り済み' : 'お気に入りに追加'}</span>
                       </button>
@@ -866,14 +864,14 @@ function App() {
                       <div className="flex items-center space-x-2">
                         <span className="text-gray-500 text-sm">🇺🇸</span>
                         <span className="font-mono text-base md:text-lg">{selectedWord.pronunciations.us.ipa}</span>
-                        <button className="p-1.5 hover:bg-gray-100 rounded-full"><Volume2 className="w-4 h-4 text-gray-500" /></button>
+                        <button className="p-1.5 hover:bg-gray-100 rounded-full"><Volume2 className="w-4 h-4 text-gray-400" /></button>
                       </div>
                     )}
                     {selectedWord.pronunciations.uk?.ipa && (
                       <div className="flex items-center space-x-2">
                         <span className="text-gray-500 text-sm">🇬🇧</span>
                         <span className="font-mono text-base md:text-lg">{selectedWord.pronunciations.uk.ipa}</span>
-                        <button className="p-1.5 hover:bg-gray-100 rounded-full"><Volume2 className="w-4 h-4 text-gray-500" /></button>
+                        <button className="p-1.5 hover:bg-gray-100 rounded-full"><Volume2 className="w-4 h-4 text-gray-400" /></button>
                       </div>
                     )}
                   </div>
@@ -982,7 +980,7 @@ function App() {
                   <p className="text-sm">まだ投稿がありません。最初の投稿をしてみましょう！</p>
                 </div>
               ) : (
-                <div className="space-y-0 border border-gray-200 rounded-2xl overflow-hidden">
+                <div className="space-y-4">
                   {wordPosts.map(post => (
                     <PostCard key={post.id} post={post} currentUser={user} onDelete={deletePost} onLoginRequired={() => setShowAuth(true)} />
                   ))}
