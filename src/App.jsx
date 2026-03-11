@@ -757,7 +757,7 @@ function App() {
       </header>
 
       {/* ===== レイアウト ===== */}
-      <div className="max-w-[1280px] mx-auto flex items-start">
+      <div className="max-w-[1280px] mx-auto flex items-start justify-center">
 
         {/* ===== 左サイドバー (md以上で表示) ===== */}
         <div className="hidden md:flex flex-col items-center xl:items-start shrink-0 sticky top-0 h-screen
@@ -892,30 +892,57 @@ function App() {
             ) : (
               <div>
                 {filteredWords.map((word) => (
-                  <div key={word.id} className="bg-white border-b border-gray-200 overflow-hidden hover:bg-gray-50/50 transition cursor-pointer">
-                    {word.youtube_shorts && word.youtube_shorts.length > 0 && (
-                      <div className="relative h-36 bg-gray-200" onClick={() => openWordDetail(word)}>
-                        <img src={`https://img.youtube.com/vi/${word.youtube_shorts[0]}/mqdefault.jpg`} alt={word.word} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
-                          <div className="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center">
-                            <div className="w-0 h-0 border-l-8 border-l-white border-t-6 border-t-transparent border-b-6 border-b-transparent ml-1"></div>
-                          </div>
+                  <div key={word.id} className="bg-white border-b border-gray-200 hover:bg-gray-50/50 transition cursor-pointer">
+                    {/* X風：左アイコン＋右コンテンツ */}
+                    <div className="flex px-4 pt-4 pb-3 space-x-3">
+                      {/* 左：HOWDEEアカウントアイコン */}
+                      <div className="shrink-0" onClick={() => openWordDetail(word)}>
+                        <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center">
+                          <BookOpen className="w-5 h-5 text-white" />
                         </div>
                       </div>
-                    )}
-                    <div className="px-4 pt-3 pb-1" onClick={() => openWordDetail(word)}>
-                      <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-1">{word.word}</h3>
-                      {word.pronunciations?.us?.ipa && <p className="text-gray-500 text-sm mb-2">{word.pronunciations.us.ipa}</p>}
-                      {word.meanings && word.meanings[0]?.definitions && word.meanings[0].definitions[0] && (
-                        <p className="text-gray-700 text-sm line-clamp-2">{word.meanings[0].definitions[0].definition}</p>
-                      )}
-                    </div>
-                    <div className="px-4 pb-3">
-                      <button onClick={(e) => { e.stopPropagation(); toggleFavorite(word.id); }}
-                        className="w-full flex items-center justify-center space-x-2 py-2.5 border border-gray-200 rounded-full hover:bg-gray-50 active:bg-gray-100 transition text-sm">
-                        <Heart className={`w-4 h-4 ${favorites.includes(word.id) ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
-                        <span className="text-gray-700">{favorites.includes(word.id) ? 'お気に入り済み' : 'お気に入りに追加'}</span>
-                      </button>
+                      {/* 右：コンテンツ */}
+                      <div className="flex-1 min-w-0" onClick={() => openWordDetail(word)}>
+                        {/* ヘッダー行：単語名＋発音記号 */}
+                        <div className="flex items-baseline space-x-2 mb-1">
+                          <span className="font-bold text-gray-900 text-lg leading-tight">{word.word}</span>
+                          {word.pronunciations?.us?.ipa && (
+                            <span className="text-gray-400 text-sm">{word.pronunciations.us.ipa}</span>
+                          )}
+                        </div>
+                        {/* 意味 */}
+                        {word.meanings?.[0]?.definitions?.[0] && (
+                          <p className="text-gray-700 text-sm leading-relaxed line-clamp-2 mb-2">
+                            {word.meanings[0].definitions[0].definition}
+                          </p>
+                        )}
+                        {/* 動画サムネイル（w2:h3＝縦長、横100%） */}
+                        {word.youtube_shorts && word.youtube_shorts.length > 0 && (
+                          <div className="relative w-full rounded-2xl overflow-hidden bg-gray-100 mb-3"
+                            style={{ paddingBottom: '150%' }}>
+                            <img
+                              src={`https://img.youtube.com/vi/${word.youtube_shorts[0]}/mqdefault.jpg`}
+                              alt={word.word}
+                              className="absolute inset-0 w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
+                              <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
+                                <div className="w-0 h-0 border-l-[10px] border-l-white border-t-[7px] border-t-transparent border-b-[7px] border-b-transparent ml-1"></div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        {/* アクションバー */}
+                        <div className="flex items-center -ml-2">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); toggleFavorite(word.id); }}
+                            className={`flex items-center space-x-1.5 px-2 py-1.5 rounded-full text-sm transition
+                              ${favorites.includes(word.id) ? 'text-red-500 hover:bg-red-50' : 'text-gray-400 hover:bg-red-50 hover:text-red-400'}`}>
+                            <Heart className={`w-4 h-4 ${favorites.includes(word.id) ? 'fill-current' : ''}`} />
+                            {favorites.includes(word.id) && <span className="text-xs">済み</span>}
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -1078,7 +1105,7 @@ function App() {
         </div>{/* /メインカラム */}
 
         {/* ===== 右サイドバー (lg以上で表示) ===== */}
-        <div className="hidden lg:block shrink-0 w-[290px] xl:w-[350px] px-4 xl:px-6 py-4 sticky top-0 h-screen overflow-y-auto">
+        <div className="hidden lg:block shrink-0 w-[290px] xl:w-[350px] px-4 xl:px-6 py-4 sticky top-0 h-screen overflow-y-auto bg-white border-l border-gray-200">
           {/* 検索ボックス */}
           <div className="relative mb-4">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
