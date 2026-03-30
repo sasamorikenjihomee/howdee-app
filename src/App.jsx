@@ -839,8 +839,8 @@ function App() {
 
             {/* 右側：モバイルボタン */}
             <div className="flex md:hidden items-center space-x-2">
-              <button onClick={() => setCurrentView(currentView === 'list' ? 'list' : 'list')}
-                className="p-2 hover:bg-gray-100 rounded-lg text-gray-600" onClick={() => { setShowMobileMenu(false); setCurrentView('list'); }}>
+              <button onClick={() => { setShowMobileMenu(false); setCurrentView('list'); }}
+                className="p-2 hover:bg-gray-100 rounded-lg text-gray-600">
                 <Search className="w-5 h-5" onClick={(e) => { e.stopPropagation(); document.getElementById('mobile-search')?.focus(); }} />
               </button>
               <button onClick={() => setShowMobileMenu(true)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-700">
