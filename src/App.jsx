@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Volume2, BookOpen, Star, Search, X, Heart, LogOut, User, ArrowLeft, MessageSquare, Send, Trash2, Rss, ChevronDown, ChevronUp, ThumbsUp, Edit2, Menu, Share2 } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const SUPABASE_URL = 'https://lmfyihmgutdqkycfchiv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_vvksyX1iHLLDo_R0MFmXrw_7oLPkzOi';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
