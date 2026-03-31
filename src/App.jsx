@@ -204,7 +204,7 @@ const ProfilePage = ({ user, profile, onEditProfile, currentUser, onLoginRequire
   const displayName = profile?.display_name || profile?.username || user?.email || 'ユーザー';
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-4">
       <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-4">
@@ -1068,11 +1068,11 @@ function App() {
             {/* ① 単語ヘッダー */}
             <div className="px-4 pt-5 pb-4 border-b border-gray-100">
               {/* 単語 + 音声ボタン */}
-              <div className="flex items-start justify-between">
-                <h2 className="text-4xl font-bold text-gray-900 leading-tight">{selectedWord.word}</h2>
+              <div className="flex items-center">
+                <h2 className="text-5xl font-black text-gray-900 leading-tight">{selectedWord.word}</h2>
                 <button
                   onClick={() => speak(selectedWord.word)}
-                  className="p-2 hover:bg-gray-100 rounded-full transition ml-3 flex-shrink-0 mt-1"
+                  className="p-2 hover:bg-gray-100 rounded-full transition ml-3 flex-shrink-0"
                   aria-label="発音を聞く">
                   <Volume2 className="w-5 h-5 text-gray-600" />
                 </button>
@@ -1083,7 +1083,7 @@ function App() {
                 <p className="text-gray-400 text-sm mt-1">
                   {Object.entries(selectedWord.inflections)
                     .filter(([, v]) => v)
-                    .map(([k, v]) => `${INFLECTION_LABELS[k] || k}: ${v}`)
+                    .map(([, v]) => v)
                     .join(' · ')}
                 </p>
               )}
@@ -1159,7 +1159,7 @@ function App() {
                     <h4 className="text-xl font-bold text-gray-900 mb-1">{def.definition}</h4>
                     {/* 英語説明（登録単語リンク付き） */}
                     {def.explanation && (
-                      <p className="text-gray-500 text-sm leading-relaxed mb-3">
+                      <p className="bg-gray-50 rounded-lg p-3 text-gray-500 text-sm leading-relaxed mb-3">
                         {linkifyText(def.explanation, words, openWordDetail)}
                       </p>
                     )}
@@ -1199,8 +1199,8 @@ function App() {
               <div className="mb-4">
                 {selectedWord.youtube_shorts.length === 1 ? (
                   /* 1件：中央に縦長表示 */
-                  <div className="flex justify-center px-4">
-                    <div className="w-52 rounded-2xl overflow-hidden" style={{ aspectRatio: '9/16' }}>
+                  <div className="px-4">
+                    <div className="max-w-sm mx-auto rounded-2xl overflow-hidden aspect-[9/16]">
                       <iframe
                         width="100%" height="100%"
                         src={`https://www.youtube.com/embed/${selectedWord.youtube_shorts[0]}?playsinline=1&rel=0`}
