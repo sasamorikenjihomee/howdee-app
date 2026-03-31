@@ -1152,58 +1152,75 @@ function App() {
             )}
 
             {/* ③ 意味カード */}
-            {selectedWord.meanings?.map((meaning, idx) => (
-              <div key={idx} className="mx-4 mb-4 bg-white rounded-2xl border border-gray-200 overflow-hidden">
-                {/* 品詞バッジ */}
-                <div className="px-4 pt-4 pb-3 flex items-center space-x-2">
-                  <span className="px-3 py-1 bg-gray-900 text-white rounded-full text-sm font-bold">
-                    {meaning.part_of_speech}
-                  </span>
-                  {meaning.part_of_speech_en && (
-                    <span className="text-gray-400 text-sm">{meaning.part_of_speech_en}</span>
-                  )}
-                </div>
+            {selectedWord.meanings?.map((meaning, idx) => {
+              const posEnMap = { 名詞: 'noun', 動詞: 'verb', 形容詞: 'adjective', 副詞: 'adverb', 前置詞: 'preposition', 接続詞: 'conjunction', 代名詞: 'pronoun' };
+              const posEn = posEnMap[meaning.part_of_speech] || meaning.part_of_speech_en;
+              return (
+                <div key={idx} className="mx-4 mb-4 bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                  {/* 単語名 */}
+                  <div className="px-4 pt-4 pb-1">
+                    <p className="text-2xl font-bold text-gray-900">{selectedWord.word}</p>
+                  </div>
 
-                {meaning.definitions?.map((def, defIdx) => (
-                  <div key={defIdx} className={`px-4 pb-4 ${defIdx > 0 ? 'border-t border-gray-100 pt-4' : ''}`}>
-                    {/* 日本語定義 */}
-                    <h4 className="text-xl font-bold text-gray-900 mb-1">{def.definition}</h4>
-                    {/* 英語説明（登録単語リンク付き） */}
-                    {def.explanation && (
-                      <p className="bg-gray-50 rounded-lg p-3 text-gray-500 text-sm leading-relaxed mb-3">
-                        {linkifyText(def.explanation, words, openWordDetail)}
-                      </p>
-                    )}
-                    {/* 例文（音声ボタン・登録単語リンク付き） */}
-                    {def.examples?.length > 0 && (
-                      <div className="space-y-2.5">
-                        {def.examples.map((example, exIdx) => {
-                          const enText = typeof example === 'object' ? example.en : example;
-                          const jaText = typeof example === 'object' ? example.ja : null;
-                          return (
-                            <div key={exIdx} className="flex items-start space-x-2">
-                              <span className="text-gray-300 flex-shrink-0 text-lg leading-tight mt-0.5">·</span>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-gray-800 text-sm italic">
-                                  {linkifyText(enText, words, openWordDetail)}
-                                </p>
-                                {jaText && <p className="text-gray-400 text-xs mt-0.5">{jaText}</p>}
-                              </div>
-                              <button
-                                onClick={() => speak(enText)}
-                                className="flex-shrink-0 p-1 hover:bg-gray-100 rounded-full transition"
-                                aria-label="例文を聞く">
-                                <Volume2 className="w-4 h-4 text-gray-400" />
-                              </button>
-                            </div>
-                          );
-                        })}
-                      </div>
+                  {/* 品詞バッジ */}
+                  <div className="px-4 pb-3 flex items-center space-x-2">
+                    <span className="px-3 py-1 bg-gray-900 text-white rounded-full text-sm font-bold">
+                      {meaning.part_of_speech}
+                    </span>
+                    {posEn && (
+                      <span className="text-gray-500 text-sm">{posEn}</span>
                     )}
                   </div>
-                ))}
-              </div>
-            ))}
+
+                  {meaning.definitions?.map((def, defIdx) => (
+                    <div key={defIdx} className={`px-4 pb-4 ${defIdx > 0 ? 'border-t border-gray-100 pt-4' : ''}`}>
+                      {/* 日本語の意味・英語説明・日本語解説（緑ライン） */}
+                      <div className="border-l-4 border-green-500 pl-3 mb-3">
+                        <h4 className="text-xl font-bold text-gray-900">{def.definition}</h4>
+                        {def.explanation_en && (
+                          <p className="text-sm text-gray-500 mt-1 leading-relaxed">{def.explanation_en}</p>
+                        )}
+                        {def.explanation && (
+                          <p className="text-base text-gray-700 mt-1 leading-relaxed">
+                            {linkifyText(def.explanation, words, openWordDetail)}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* 例文 */}
+                      {def.examples?.length > 0 && (
+                        <div className="space-y-2.5">
+                          {def.examples.map((example, exIdx) => {
+                            const enText = typeof example === 'object' ? example.en : example;
+                            const jaText = typeof example === 'object' ? example.ja : (def.examples_ja?.[exIdx] ?? null);
+                            return (
+                              <div key={exIdx} className="flex items-start space-x-2">
+                                <button
+                                  onClick={() => {
+                                    const utterance = new SpeechSynthesisUtterance(enText);
+                                    utterance.lang = 'en-US';
+                                    window.speechSynthesis.speak(utterance);
+                                  }}
+                                  className="w-8 h-8 rounded-full bg-black flex items-center justify-center flex-shrink-0"
+                                  aria-label="例文を聞く">
+                                  <Volume2 className="w-4 h-4 text-white" />
+                                </button>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-base font-medium text-gray-800">
+                                    {linkifyText(enText, words, openWordDetail)}
+                                  </p>
+                                  {jaText && <p className="text-sm text-gray-500 mt-0.5">{jaText}</p>}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
 
             {/* ④ YouTubeショート */}
             {selectedWord.youtube_shorts?.length > 0 && (
