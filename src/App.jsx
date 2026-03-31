@@ -13,14 +13,6 @@ const extractYouTubeId = (url) => {
   return match ? match[1] : null;
 };
 
-// ===== Web Speech API で発音 =====
-const speak = (text, lang = 'en-US') => {
-  if (!('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = lang;
-  window.speechSynthesis.speak(utterance);
-};
 
 // ===== 屈折形ラベル =====
 const INFLECTION_LABELS = {
@@ -41,7 +33,7 @@ const linkifyText = (text, words, onWordClick) => {
     if (matched) {
       return (
         <span key={i}
-          className="text-blue-500 cursor-pointer hover:underline font-medium"
+          className="cursor-pointer font-medium"
           onClick={(e) => { e.stopPropagation(); onWordClick(matched); }}>
           {token}
         </span>
@@ -493,6 +485,28 @@ const PostForm = ({ user, onSubmit, onLoginRequired }) => {
 
 // ===== メインApp =====
 function App() {
+  const speak = (text) => {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = 0.8;
+    utterance.pitch = 1.2;
+    const voices = window.speechSynthesis.getVoices();
+    const femaleVoice = voices.find(v =>
+      v.lang.startsWith('en') && (
+        v.name.includes('female') ||
+        v.name.includes('Female') ||
+        v.name.includes('Samantha') ||
+        v.name.includes('Karen') ||
+        v.name.includes('Victoria') ||
+        v.name.includes('Moira') ||
+        v.name.includes('Tessa')
+      )
+    );
+    if (femaleVoice) utterance.voice = femaleVoice;
+    window.speechSynthesis.speak(utterance);
+  };
+
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [words, setWords] = useState([]);
@@ -1073,11 +1087,7 @@ function App() {
               {/* 音声ボタン（中央揃え） */}
               <div className="flex justify-center mt-3">
                 <button
-                  onClick={() => {
-                    const utterance = new SpeechSynthesisUtterance(selectedWord.word);
-                    utterance.lang = 'en-US';
-                    window.speechSynthesis.speak(utterance);
-                  }}
+                  onClick={() => speak(selectedWord.word)}
                   className="w-16 h-16 rounded-full bg-black text-white flex items-center justify-center hover:bg-gray-800 transition"
                   aria-label="発音を聞く">
                   <Volume2 className="w-7 h-7" />
@@ -1204,11 +1214,7 @@ function App() {
                                     {linkifyText(enText, words, openWordDetail)}
                                   </p>
                                   <button
-                                    onClick={() => {
-                                      const utterance = new SpeechSynthesisUtterance(enText);
-                                      utterance.lang = 'en-US';
-                                      window.speechSynthesis.speak(utterance);
-                                    }}
+                                    onClick={() => speak(enText)}
                                     className="flex-shrink-0 w-8 h-8 rounded-full bg-black flex items-center justify-center"
                                     aria-label="例文を聞く">
                                     <Volume2 className="w-4 h-4 text-white" />
