@@ -1131,15 +1131,15 @@ function App() {
                   Essential Levels{' '}
                   <span className="text-gray-400 font-normal">学習の重要度</span>
                 </h3>
-                <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                <div className="grid grid-cols-2 gap-3">
                   {[
                     ['アメリカ英語', selectedWord.necessity_ratings.american_conversation],
                     ['イギリス英語', selectedWord.necessity_ratings.british_conversation],
                     ['TOEIC', selectedWord.necessity_ratings.toeic],
                     ['英検', selectedWord.necessity_ratings.eiken],
                   ].map(([label, value]) => value != null && (
-                    <div key={label}>
-                      <p className="text-xs text-gray-500 mb-1">{label}</p>
+                    <div key={label} className="flex items-center space-x-2">
+                      <span className="text-sm text-gray-700 w-20">{label}</span>
                       <div className="flex space-x-0.5">
                         {[...Array(5)].map((_, i) => (
                           <Star key={i} className={`w-4 h-4 ${i < value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
