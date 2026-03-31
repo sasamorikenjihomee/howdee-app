@@ -1300,7 +1300,7 @@ function App() {
                 <h3 className="font-bold text-base text-gray-900 mb-3">
                   Synonyms <span className="text-gray-400 font-normal text-sm">類似単語</span>
                 </h3>
-                <div className="grid grid-cols-3 gap-y-2 gap-x-2">
+                <div className="flex flex-wrap gap-x-4 gap-y-2">
                   {selectedWord.similar_words.map((w, idx) => {
                     const registered = words.find(r => r.word.toLowerCase() === w.toLowerCase());
                     return registered ? (
