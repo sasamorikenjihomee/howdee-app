@@ -1067,49 +1067,60 @@ function App() {
 
             {/* ① 単語ヘッダー */}
             <div className="px-4 pt-5 pb-4 border-b border-gray-100">
-              {/* 単語 + 音声ボタン */}
-              <div className="flex items-center">
-                <h2 className="text-5xl font-black text-gray-900 leading-tight">{selectedWord.word}</h2>
+              {/* 単語名（中央揃え） */}
+              <h2 className="text-5xl font-black text-gray-900 text-center leading-tight">{selectedWord.word}</h2>
+
+              {/* 音声ボタン（中央揃え） */}
+              <div className="flex justify-center mt-3">
                 <button
-                  onClick={() => speak(selectedWord.word)}
-                  className="p-2 hover:bg-gray-100 rounded-full transition ml-3 flex-shrink-0"
+                  onClick={() => {
+                    const utterance = new SpeechSynthesisUtterance(selectedWord.word);
+                    utterance.lang = 'en-US';
+                    window.speechSynthesis.speak(utterance);
+                  }}
+                  className="w-16 h-16 rounded-full bg-black text-white flex items-center justify-center hover:bg-gray-800 transition"
                   aria-label="発音を聞く">
-                  <Volume2 className="w-5 h-5 text-gray-600" />
+                  <Volume2 className="w-7 h-7" />
                 </button>
               </div>
 
-              {/* 屈折形（複数形・過去形など） */}
-              {selectedWord.inflections && Object.keys(selectedWord.inflections).length > 0 && (
-                <p className="text-gray-400 text-sm mt-1">
-                  {Object.entries(selectedWord.inflections)
-                    .filter(([, v]) => v)
-                    .map(([, v]) => v)
-                    .join(' · ')}
-                </p>
-              )}
+              {/* 活用形 + ハートシェアボタン（左右2列） */}
+              <div className="flex items-start justify-between mt-4">
+                {/* 左：活用形 */}
+                {selectedWord.inflections && Object.keys(selectedWord.inflections).length > 0 ? (
+                  <div className="flex flex-col space-y-0.5">
+                    {Object.entries(selectedWord.inflections)
+                      .filter(([, v]) => v)
+                      .map(([k, v]) => {
+                        const label = { plural: '複数形', past: '過去形', ing: '進行形', comparative: '比較級', superlative: '最上級', third_person: '三人称単数' }[k];
+                        if (!label) return null;
+                        return (
+                          <p key={k} className="text-sm">
+                            <span className="text-gray-400">＜{label}＞ </span>
+                            <span className="text-gray-700">{v}</span>
+                          </p>
+                        );
+                      })}
+                  </div>
+                ) : (
+                  <div />
+                )}
 
-              {/* シェア・お気に入りボタン */}
-              <div className="flex items-center space-x-1 mt-3">
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(window.location.href).catch(() => {});
-                    setShareCopied(true);
-                    setTimeout(() => setShareCopied(false), 2000);
-                  }}
-                  className="flex items-center space-x-1.5 px-3 py-1.5 hover:bg-gray-100 rounded-full transition text-gray-500 text-sm">
-                  <Share2 className="w-4 h-4" />
-                  <span>{shareCopied ? 'コピー済み!' : 'シェア'}</span>
-                </button>
-                <button
-                  onClick={() => toggleFavorite(selectedWord.id)}
-                  className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full transition text-sm ${
-                    favorites.includes(selectedWord.id)
-                      ? 'text-red-500 hover:bg-red-50'
-                      : 'text-gray-500 hover:bg-gray-100'
-                  }`}>
-                  <Heart className={`w-4 h-4 ${favorites.includes(selectedWord.id) ? 'fill-current' : ''}`} />
-                  <span>{favorites.includes(selectedWord.id) ? 'お気に入り済み' : 'お気に入り'}</span>
-                </button>
+                {/* 右：ハート・シェアボタン */}
+                <div className="flex items-center space-x-2 flex-shrink-0">
+                  <button
+                    onClick={() => user ? toggleFavorite(selectedWord.id) : setShowAuth(true)}
+                    className="p-2 hover:bg-gray-100 rounded-full transition"
+                    aria-label="お気に入り">
+                    <Heart className={`w-6 h-6 ${favorites.includes(selectedWord.id) ? 'fill-red-500 text-red-500' : 'text-gray-500'}`} />
+                  </button>
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(window.location.href).catch(() => {}); }}
+                    className="p-2 hover:bg-gray-100 rounded-full transition"
+                    aria-label="シェア">
+                    <Share2 className="w-6 h-6 text-gray-500" />
+                  </button>
+                </div>
               </div>
             </div>
 
