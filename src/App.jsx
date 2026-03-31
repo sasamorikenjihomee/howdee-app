@@ -1142,7 +1142,7 @@ function App() {
                       <p className="text-xs text-gray-500 mb-1">{label}</p>
                       <div className="flex space-x-0.5">
                         {[...Array(5)].map((_, i) => (
-                          <Star key={i} className={`w-4 h-4 ${i < value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`} />
+                          <Star key={i} className={`w-4 h-4 ${i < value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
                         ))}
                       </div>
                     </div>
