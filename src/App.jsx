@@ -1173,44 +1173,48 @@ function App() {
                   </div>
 
                   {meaning.definitions?.map((def, defIdx) => (
-                    <div key={defIdx} className={`px-4 pb-4 ${defIdx > 0 ? 'border-t border-gray-100 pt-4' : ''}`}>
-                      {/* 日本語の意味・英語説明・日本語解説（緑ライン） */}
-                      <div className="border-l-4 border-green-500 pl-3 mb-3">
+                    <div key={defIdx} className={`pb-4 ${defIdx > 0 ? 'border-t border-gray-100 pt-4' : ''}`}>
+                      {/* 日本語の意味・英語説明（緑ライン） */}
+                      <div className="border-l-4 border-green-500 pl-3 mb-2">
                         <h4 className="text-xl font-bold text-gray-900">{def.definition}</h4>
                         {def.explanation_en && (
                           <p className="text-sm text-gray-500 mt-1 leading-relaxed">{def.explanation_en}</p>
                         )}
-                        {def.explanation && (
-                          <p className="text-base text-gray-700 mt-1 leading-relaxed">
+                      </div>
+
+                      {/* 日本語解説（緑ラインなし） */}
+                      {def.explanation && (
+                        <div className="px-4 mb-3">
+                          <p className="text-base text-gray-700 leading-relaxed">
                             {linkifyText(def.explanation, words, openWordDetail)}
                           </p>
-                        )}
-                      </div>
+                        </div>
+                      )}
 
                       {/* 例文 */}
                       {def.examples?.length > 0 && (
-                        <div className="space-y-2.5">
+                        <div className="space-y-2.5 px-4">
                           {def.examples.map((example, exIdx) => {
                             const enText = typeof example === 'object' ? example.en : example;
                             const jaText = typeof example === 'object' ? example.ja : (def.examples_ja?.[exIdx] ?? null);
                             return (
-                              <div key={exIdx} className="flex items-start space-x-2">
-                                <button
-                                  onClick={() => {
-                                    const utterance = new SpeechSynthesisUtterance(enText);
-                                    utterance.lang = 'en-US';
-                                    window.speechSynthesis.speak(utterance);
-                                  }}
-                                  className="w-8 h-8 rounded-full bg-black flex items-center justify-center flex-shrink-0"
-                                  aria-label="例文を聞く">
-                                  <Volume2 className="w-4 h-4 text-white" />
-                                </button>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-base font-medium text-gray-800">
+                              <div key={exIdx}>
+                                <div className="flex items-start justify-between gap-2">
+                                  <p className="flex-1 text-base font-medium text-gray-800">
                                     {linkifyText(enText, words, openWordDetail)}
                                   </p>
-                                  {jaText && <p className="text-sm text-gray-500 mt-0.5">{jaText}</p>}
+                                  <button
+                                    onClick={() => {
+                                      const utterance = new SpeechSynthesisUtterance(enText);
+                                      utterance.lang = 'en-US';
+                                      window.speechSynthesis.speak(utterance);
+                                    }}
+                                    className="flex-shrink-0 w-8 h-8 rounded-full bg-black flex items-center justify-center"
+                                    aria-label="例文を聞く">
+                                    <Volume2 className="w-4 h-4 text-white" />
+                                  </button>
                                 </div>
+                                {jaText && <p className="text-sm text-gray-500 mt-0.5">{jaText}</p>}
                               </div>
                             );
                           })}
