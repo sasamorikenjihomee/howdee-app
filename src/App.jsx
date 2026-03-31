@@ -1232,7 +1232,7 @@ function App() {
                 {selectedWord.youtube_shorts.length === 1 ? (
                   /* 1件：中央に縦長表示 */
                   <div className="px-4">
-                    <div className="max-w-sm mx-auto rounded-2xl overflow-hidden aspect-[9/16]">
+                    <div className="max-w-[280px] mx-auto rounded-2xl overflow-hidden aspect-[9/16]">
                       <iframe
                         width="100%" height="100%"
                         src={`https://www.youtube.com/embed/${selectedWord.youtube_shorts[0]}?playsinline=1&rel=0`}
@@ -1244,10 +1244,10 @@ function App() {
                 ) : (
                   /* 複数件：横スクロールスライダー */
                   <div
-                    className="flex overflow-x-auto gap-3 px-4 pb-2 snap-x snap-mandatory"
-                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                    className="flex overflow-x-auto gap-4 px-4 pb-2 scrollbar-hide"
+                    style={{ scrollSnapType: 'x mandatory' }}>
                     {selectedWord.youtube_shorts.map((vid, i) => (
-                      <div key={i} className="flex-shrink-0 w-44 rounded-2xl overflow-hidden snap-start" style={{ aspectRatio: '9/16' }}>
+                      <div key={i} className="w-[260px] flex-shrink-0 rounded-2xl overflow-hidden aspect-[9/16]" style={{ scrollSnapAlign: 'start' }}>
                         <iframe
                           width="100%" height="100%"
                           src={`https://www.youtube.com/embed/${vid}?playsinline=1&rel=0`}
