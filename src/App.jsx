@@ -529,9 +529,11 @@ function App() {
   const [password, setPassword] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState('');
+  const [idioms, setIdioms] = useState([]);
+  const [selectedIdiom, setSelectedIdiom] = useState(null);
 
   useEffect(() => {
-    checkUser(); fetchWords();
+    checkUser(); fetchWords(); fetchIdioms();
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) { fetchFavorites(session.user.id); fetchProfile(session.user.id); }
@@ -567,6 +569,16 @@ function App() {
       if (response.ok) { const data = await response.json(); setWords(data); setFilteredWords(data); }
     } catch (error) { console.error(error); }
     setLoading(false);
+  };
+
+  const fetchIdioms = async () => {
+    try {
+      const response = await fetch(
+        `${SUPABASE_URL}/rest/v1/idioms?select=*&order=created_at.desc`,
+        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+      );
+      if (response.ok) { const data = await response.json(); setIdioms(data); }
+    } catch (error) { console.error(error); }
   };
 
   const fetchFavorites = async (userId) => {
@@ -681,6 +693,12 @@ function App() {
   const openWordDetail = (word) => {
     setSelectedWord(word); setCurrentView('detail');
     fetchWordPosts(word.id); window.scrollTo(0, 0);
+  };
+
+  const openIdiomDetail = (idiom) => {
+    setSelectedIdiom(idiom);
+    setCurrentView('idiom-detail');
+    window.scrollTo(0, 0);
   };
 
   if (loading) {
@@ -903,6 +921,8 @@ function App() {
               { view: 'fav', icon: <Heart className={`w-6 h-6 shrink-0 ${showFavoritesOnly ? 'fill-current text-red-500' : ''}`} />, label: 'お気に入り',
                 action: () => { if (user) { setShowFavoritesOnly(!showFavoritesOnly); navigateTo('list'); } else setShowAuth(true); },
                 active: showFavoritesOnly },
+              { view: 'idioms', icon: <BookOpen className="w-6 h-6 shrink-0" />, label: 'Idiom',
+                action: () => navigateTo('idioms'), active: currentView === 'idioms' || currentView === 'idiom-detail' },
               { view: 'profile', icon: <User className="w-6 h-6 shrink-0" />, label: user ? (profile?.display_name || profile?.username || 'マイページ') : 'ログイン',
                 action: () => { if (user) navigateTo('profile'); else setShowAuth(true); },
                 active: currentView === 'profile' },
@@ -963,6 +983,8 @@ function App() {
               {currentView === 'list' ? (showFavoritesOnly ? 'お気に入り' : '単語') :
                currentView === 'feed' ? 'みんなの投稿' :
                currentView === 'profile' ? 'プロフィール' :
+               currentView === 'idioms' ? 'Idiom' :
+               currentView === 'idiom-detail' && selectedIdiom ? selectedIdiom.phrase :
                currentView === 'detail' && selectedWord ? selectedWord.word : ''}
             </h1>
           </div>
@@ -991,6 +1013,45 @@ function App() {
                 {feedPosts.map(post => (
                   <PostCard key={post.id} post={post} currentUser={user} onDelete={deletePost}
                     onLoginRequired={() => setShowAuth(true)} wordName={post.words?.word} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Idiom一覧ページ */}
+        {currentView === 'idioms' && (
+          <div>
+            <div className="px-4 pt-2 pb-3 border-b border-gray-100">
+              <h2 className="text-base font-bold text-gray-900">USラップ イディオム</h2>
+              <p className="text-gray-400 text-xs">{idioms.length}件</p>
+            </div>
+            {idioms.length === 0 ? (
+              <div className="text-center py-16">
+                <p className="text-gray-500">まだ登録されていません</p>
+              </div>
+            ) : (
+              <div>
+                {idioms.map((idiom) => (
+                  <div key={idiom.id} className="bg-white border-b border-gray-200 hover:bg-gray-50/50 transition cursor-pointer"
+                    onClick={() => openIdiomDetail(idiom)}>
+                    <div className="flex px-4 pt-4 pb-3 space-x-3">
+                      <div className="shrink-0">
+                        <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center">
+                          <BookOpen className="w-5 h-5 text-white" />
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-baseline space-x-2 mb-1">
+                          <span className="font-bold text-gray-900 text-lg leading-tight">{idiom.phrase}</span>
+                          {idiom.reading && <span className="text-gray-400 text-sm">{idiom.reading}</span>}
+                        </div>
+                        {idiom.meaning_ja && (
+                          <p className="text-gray-700 text-sm leading-relaxed line-clamp-2">{idiom.meaning_ja}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
@@ -1370,6 +1431,73 @@ function App() {
             </div>
           </div>
         )}
+        {/* Idiom詳細ページ */}
+        {currentView === 'idiom-detail' && selectedIdiom && (
+          <div className="bg-white">
+            <div className="px-4 pt-5 pb-4 border-b border-gray-100">
+              <h2 className="text-4xl font-black text-gray-900 text-center leading-tight">{selectedIdiom.phrase}</h2>
+              {selectedIdiom.reading && (
+                <p className="text-center text-gray-400 mt-1">{selectedIdiom.reading}</p>
+              )}
+              <div className="flex justify-center mt-3">
+                <button
+                  onClick={() => speak(selectedIdiom.phrase)}
+                  className="w-16 h-16 rounded-full bg-black text-white flex items-center justify-center hover:bg-gray-800 transition">
+                  <Volume2 className="w-7 h-7" />
+                </button>
+              </div>
+            </div>
+
+            {selectedIdiom.meaning_ja && (
+              <div className="mx-4 my-4 p-4 bg-white rounded-2xl border border-gray-200">
+                <div className="border-l-4 border-green-500 pl-3">
+                  <h4 className="text-xl font-bold text-gray-900">{selectedIdiom.meaning_ja}</h4>
+                  {selectedIdiom.meaning_en && (
+                    <p className="text-sm text-gray-500 mt-1">{selectedIdiom.meaning_en}</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {selectedIdiom.origin && (
+              <div className="mx-4 mb-4 p-4 bg-gray-50 rounded-2xl">
+                <h3 className="font-bold text-sm text-gray-900 mb-2">Origin 🎤</h3>
+                <p className="text-gray-700 text-sm leading-relaxed">{selectedIdiom.origin}</p>
+              </div>
+            )}
+
+            {selectedIdiom.example_sentence && (
+              <div className="mx-4 mb-4 p-4 bg-white rounded-2xl border border-gray-200">
+                <h3 className="font-bold text-sm text-gray-900 mb-2">Example</h3>
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-base font-medium text-gray-800">{selectedIdiom.example_sentence}</p>
+                  <button
+                    onClick={() => speak(selectedIdiom.example_sentence)}
+                    className="flex-shrink-0 w-8 h-8 rounded-full bg-black flex items-center justify-center">
+                    <Volume2 className="w-4 h-4 text-white" />
+                  </button>
+                </div>
+                {selectedIdiom.example_translation && (
+                  <p className="text-sm text-gray-500 mt-1">{selectedIdiom.example_translation}</p>
+                )}
+              </div>
+            )}
+
+            {selectedIdiom.youtube_video_id && (
+              <div className="px-4 mb-4">
+                <div className="max-w-[280px] mx-auto rounded-2xl overflow-hidden aspect-[9/16]">
+                  <iframe
+                    width="100%" height="100%"
+                    src={`https://www.youtube.com/embed/${selectedIdiom.youtube_video_id}?playsinline=1&rel=0`}
+                    allow="autoplay; encrypted-media; picture-in-picture"
+                    allowFullScreen title="YouTube Short"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         </div>{/* /main-inner */}
         </div>{/* /メインカラム */}
 
@@ -1424,7 +1552,7 @@ function App() {
 
       {/* ===== モバイルボトムナビ (md未満) ===== */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-30">
-        <div className="grid grid-cols-4 h-14">
+        <div className="grid grid-cols-5 h-14">
           <button onClick={() => navigateTo('list')}
             className={`flex flex-col items-center justify-center space-y-0.5 transition ${currentView === 'list' && !showFavoritesOnly ? 'text-black' : 'text-gray-400'}`}>
             <BookOpen className="w-5 h-5" />
@@ -1434,6 +1562,11 @@ function App() {
             className={`flex flex-col items-center justify-center space-y-0.5 transition ${currentView === 'feed' ? 'text-black' : 'text-gray-400'}`}>
             <Rss className="w-5 h-5" />
             <span className="text-xs">投稿</span>
+          </button>
+          <button onClick={() => navigateTo('idioms')}
+            className={`flex flex-col items-center justify-center space-y-0.5 transition ${currentView === 'idioms' || currentView === 'idiom-detail' ? 'text-black' : 'text-gray-400'}`}>
+            <BookOpen className="w-5 h-5" />
+            <span className="text-xs">Idiom</span>
           </button>
           <button onClick={() => { if (user) { setShowFavoritesOnly(!showFavoritesOnly); navigateTo('list'); } else setShowAuth(true); }}
             className={`flex flex-col items-center justify-center space-y-0.5 transition ${showFavoritesOnly ? 'text-red-500' : 'text-gray-400'}`}>
