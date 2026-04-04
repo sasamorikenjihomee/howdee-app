@@ -1448,38 +1448,36 @@ function App() {
               </div>
             </div>
 
-            {selectedIdiom.meaning_ja && (
-              <div className="mx-4 my-4 p-4 bg-white rounded-2xl border border-gray-200">
-                <div className="border-l-4 border-green-500 pl-3">
-                  <h4 className="text-xl font-bold text-gray-900">{selectedIdiom.meaning_ja}</h4>
-                  {selectedIdiom.meaning_en && (
-                    <p className="text-sm text-gray-500 mt-1">{selectedIdiom.meaning_en}</p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {selectedIdiom.origin && (
-              <div className="mx-4 mb-4 p-4 bg-gray-50 rounded-2xl">
-                <h3 className="font-bold text-sm text-gray-900 mb-2">Origin 🎤</h3>
-                <p className="text-gray-700 text-sm leading-relaxed">{selectedIdiom.origin}</p>
-              </div>
-            )}
-
-            {selectedIdiom.example_sentence && (
-              <div className="mx-4 mb-4 p-4 bg-white rounded-2xl border border-gray-200">
-                <h3 className="font-bold text-sm text-gray-900 mb-2">Example</h3>
-                <div className="flex items-start justify-between gap-2">
-                  <p className="text-base font-medium text-gray-800">{selectedIdiom.example_sentence}</p>
-                  <button
-                    onClick={() => speak(selectedIdiom.example_sentence)}
-                    className="flex-shrink-0 w-8 h-8 rounded-full bg-black flex items-center justify-center">
-                    <Volume2 className="w-4 h-4 text-white" />
-                  </button>
-                </div>
-                {selectedIdiom.example_translation && (
-                  <p className="text-sm text-gray-500 mt-1">{selectedIdiom.example_translation}</p>
+            <div className="mx-4 my-4 p-4 bg-white rounded-2xl border border-gray-200">
+              <div className="border-l-4 border-green-500 pl-3 mb-3">
+                <h4 className="text-xl font-bold text-gray-900">{selectedIdiom.meaning_ja}</h4>
+                {selectedIdiom.meaning_en && (
+                  <p className="text-sm text-gray-500 mt-1">{selectedIdiom.meaning_en}</p>
                 )}
+              </div>
+              {selectedIdiom.origin && (
+                <p className="text-gray-700 text-sm leading-relaxed">{selectedIdiom.origin}</p>
+              )}
+            </div>
+
+            {selectedIdiom.examples?.length > 0 && (
+              <div className="mx-4 mb-4 p-4 bg-white rounded-2xl border border-gray-200">
+                <h3 className="font-bold text-sm text-gray-900 mb-3">Examples</h3>
+                <div className="space-y-4">
+                  {selectedIdiom.examples.map((ex, i) => (
+                    <div key={i}>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-base font-medium text-gray-800">{ex.en}</p>
+                        <button
+                          onClick={() => speak(ex.en)}
+                          className="flex-shrink-0 w-8 h-8 rounded-full bg-black flex items-center justify-center">
+                          <Volume2 className="w-4 h-4 text-white" />
+                        </button>
+                      </div>
+                      {ex.ja && <p className="text-sm text-gray-500 mt-0.5">{ex.ja}</p>}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -1492,6 +1490,27 @@ function App() {
                     allow="autoplay; encrypted-media; picture-in-picture"
                     allowFullScreen title="YouTube Short"
                   />
+                </div>
+              </div>
+            )}
+
+            {idioms.filter(id => id.id !== selectedIdiom.id).length > 0 && (
+              <div className="mx-4 mb-6">
+                <h3 className="font-bold text-base text-gray-900 mb-3">
+                  Browse Idioms <span className="text-gray-400 font-normal text-sm">他のイディオム</span>
+                </h3>
+                <div className="flex flex-wrap gap-x-4 gap-y-2">
+                  {idioms
+                    .filter(id => id.id !== selectedIdiom.id)
+                    .sort((a, b) => a.phrase.localeCompare(b.phrase))
+                    .map((idiom) => (
+                      <span
+                        key={idiom.id}
+                        className="text-blue-500 text-sm cursor-pointer hover:underline"
+                        onClick={() => openIdiomDetail(idiom)}>
+                        {idiom.phrase}
+                      </span>
+                    ))}
                 </div>
               </div>
             )}
