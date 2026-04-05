@@ -1434,6 +1434,15 @@ function App() {
         {/* Idiom詳細ページ */}
         {currentView === 'idiom-detail' && selectedIdiom && (
           <div className="bg-white">
+            {selectedIdiom.loop_video_url && (
+              <div className="flex justify-center pt-6 pb-2">
+                <video
+                  src={selectedIdiom.loop_video_url}
+                  autoPlay muted loop playsInline
+                  className="w-36 h-36 rounded-full object-cover border-2 border-gray-100 shadow-md"
+                />
+              </div>
+            )}
             <div className="px-4 pt-5 pb-4 border-b border-gray-100">
               <h2 className="text-4xl font-black text-gray-900 text-center leading-tight">{selectedIdiom.phrase}</h2>
               {selectedIdiom.reading && (
@@ -1481,16 +1490,35 @@ function App() {
               </div>
             )}
 
-            {selectedIdiom.youtube_video_id && (
-              <div className="px-4 mb-4">
-                <div className="max-w-[280px] mx-auto rounded-2xl overflow-hidden aspect-[9/16]">
-                  <iframe
-                    width="100%" height="100%"
-                    src={`https://www.youtube.com/embed/${selectedIdiom.youtube_video_id}?playsinline=1&rel=0`}
-                    allow="autoplay; encrypted-media; picture-in-picture"
-                    allowFullScreen title="YouTube Short"
-                  />
-                </div>
+            {selectedIdiom.youtube_shorts?.length > 0 && (
+              <div className="mb-4">
+                {selectedIdiom.youtube_shorts.length === 1 ? (
+                  <div className="px-4">
+                    <div className="max-w-[280px] mx-auto rounded-2xl overflow-hidden aspect-[9/16]">
+                      <iframe
+                        width="100%" height="100%"
+                        src={`https://www.youtube.com/embed/${selectedIdiom.youtube_shorts[0]}?playsinline=1&rel=0`}
+                        allow="autoplay; encrypted-media; picture-in-picture"
+                        allowFullScreen title="YouTube Short"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    className="flex overflow-x-auto gap-4 px-4 pb-2 scrollbar-hide"
+                    style={{ scrollSnapType: 'x mandatory' }}>
+                    {selectedIdiom.youtube_shorts.map((vid, i) => (
+                      <div key={i} className="w-[260px] flex-shrink-0 rounded-2xl overflow-hidden aspect-[9/16]" style={{ scrollSnapAlign: 'start' }}>
+                        <iframe
+                          width="100%" height="100%"
+                          src={`https://www.youtube.com/embed/${vid}?playsinline=1&rel=0`}
+                          allow="autoplay; encrypted-media; picture-in-picture"
+                          allowFullScreen title={`YouTube Short ${i + 1}`}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
