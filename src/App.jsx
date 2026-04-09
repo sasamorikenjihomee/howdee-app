@@ -717,6 +717,7 @@ function App() {
 
   const openWordDetail = (word) => {
     setSelectedWord(word);
+    setCurrentView('detail');
     fetchWordPosts(word.id);
     window.scrollTo(0, 0);
     navigate(`/words/${word.word.toLowerCase()}`);
