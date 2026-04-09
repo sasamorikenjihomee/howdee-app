@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
 import { Volume2, BookOpen, Star, Search, X, Heart, LogOut, User, ArrowLeft, MessageSquare, Send, Trash2, Rss, ChevronDown, ChevronUp, ThumbsUp, Edit2, Menu, Share2 } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -485,6 +486,7 @@ const PostForm = ({ user, onSubmit, onLoginRequired }) => {
 
 // ===== メインApp =====
 function App() {
+  const navigate = useNavigate();
   const speak = (text) => {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
@@ -544,6 +546,25 @@ function App() {
 
   useEffect(() => { filterWords(); }, [searchQuery, words, showFavoritesOnly, favorites]);
   useEffect(() => { if (currentView === 'feed') fetchFeedPosts(); }, [currentView]);
+
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path.startsWith('/words/')) {
+      const slug = path.replace('/words/', '');
+      const word = words.find(w => w.word.toLowerCase() === slug);
+      if (word) { setSelectedWord(word); setCurrentView('detail'); fetchWordPosts(word.id); }
+    } else if (path.startsWith('/idiom/')) {
+      const slug = path.replace('/idiom/', '');
+      const idiom = idioms.find(i => i.slug === slug);
+      if (idiom) { setSelectedIdiom(idiom); setCurrentView('idiom-detail'); }
+    } else if (path === '/feed') {
+      setCurrentView('feed');
+    } else if (path === '/idioms') {
+      setCurrentView('idioms');
+    } else if (path === '/profile') {
+      setCurrentView('profile');
+    }
+  }, [words, idioms]);
 
   const checkUser = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -688,17 +709,23 @@ function App() {
     setCurrentView(view);
     setShowMobileMenu(false);
     window.scrollTo(0, 0);
+    if (view === 'list') navigate('/');
+    if (view === 'feed') navigate('/feed');
+    if (view === 'idioms') navigate('/idioms');
+    if (view === 'profile') navigate('/profile');
   };
 
   const openWordDetail = (word) => {
-    setSelectedWord(word); setCurrentView('detail');
-    fetchWordPosts(word.id); window.scrollTo(0, 0);
+    setSelectedWord(word);
+    fetchWordPosts(word.id);
+    window.scrollTo(0, 0);
+    navigate(`/words/${word.word.toLowerCase()}`);
   };
 
   const openIdiomDetail = (idiom) => {
     setSelectedIdiom(idiom);
-    setCurrentView('idiom-detail');
     window.scrollTo(0, 0);
+    navigate(`/idiom/${idiom.slug}`);
   };
 
   if (loading) {
